@@ -4,7 +4,7 @@ A highly automated, symbolic General Relativity calculator and report generator 
 
 ## About
 
-This project is a powerful symbolic calculation engine tailored specifically for researchers, students, and enthusiasts in General Relativity. By leveraging SymPy's symbolic math capabilities, it eliminates the tedious and error-prone process of manually deriving tensor components (like Christoffel symbols and the Riemann tensor) by hand. 
+This project is a symbolic calculation engine tailored specifically for researchers, students, and enthusiasts in General Relativity. By leveraging SymPy's symbolic math capabilities, it eliminates the tedious and error-prone process of manually deriving tensor components (like Christoffel symbols and the Riemann tensor) by hand. 
 
 Whether you are exploring classic solutions (Schwarzschild, Kerr, FLRW) or testing novel spacetime metrics (e.g., warp drives or wormholes), this calculator provides a robust, automated pipeline to extract the physics directly from the geometry. 
 
