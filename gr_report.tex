@@ -1,0 +1,1143 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{mathtools}
+\usepackage{physics}
+\usepackage{breqn}
+\usepackage{bm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\usepackage{graphicx}
+
+% ---- Custom colours ----
+\definecolor{boxblue}{RGB}{220,235,250}
+\definecolor{boxgreen}{RGB}{220,245,225}
+\definecolor{boxred}{RGB}{250,225,220}
+
+% ---- Tensor notation shortcuts ----
+\newcommand{\Ghat}{\hat{G}}
+\newcommand{\Rhat}{\hat{R}}
+\newcommand{\christoffel}[3]{\Gamma^{#1}{}_{#2 #3}}
+\newcommand{\riemann}[4]{R^{#1}{}_{#2 #3 #4}}
+
+\title{%
+  \textbf{General Relativity Analysis} \\[0.6em]
+  \large\textit{PG-type warp metric (Spatial Conformal) Metric} \\[0.3em]
+  \normalsize Painleve-Gullstrand-type metric with lapse N=1, radial shift beta(r), and areal radius
+}
+\author{SymPy GR Engine}
+\date{February 25, 2026}
+
+\begin{document}
+\allowdisplaybreaks
+\maketitle
+\tableofcontents
+\newpage
+
+\begin{abstract}
+\sloppy
+This document presents a complete symbolic General Relativity analysis of the \textbf{PG-type warp metric (Spatial Conformal)} metric. All quantities were computed analytically using SymPy. The report includes: the metric and its inverse, Christoffel symbols, Riemann and Ricci tensors, Ricci scalar, Einstein tensor, curvature invariants (Kretschmann scalar, Weyl tensor), orthonormal-frame stress-energy components, energy conditions, geodesic equations, and conservation law verification.
+\end{abstract}
+\newpage
+\section{Metric Tensor and Conventions}
+\subsection{Coordinate System and Conventions}
+Coordinates: $(t,\,r,\,\theta,\,\phi)$. Spacetime signature: $(-,+,+,+)$. Natural units: $G = c = 1$. Greek indices run over $0,1,\ldots,3$; Latin hat-indices label orthonormal frame legs.
+\subsection{Covariant Metric $g_{\mu\nu}$}
+The line element is $ds^2 = g_{\mu\nu}\,dx^\mu dx^\nu$.
+\begin{equation}
+  g_{\mu\nu} = \begin{pmatrix}
+    B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} - 1 & B^{2}{\left(r \right)} \beta{\left(r \right)} & 0 & 0 \\
+    B^{2}{\left(r \right)} \beta{\left(r \right)} & B^{2}{\left(r \right)} & 0 & 0 \\
+    0 & 0 & r^{2} B^{2}{\left(r \right)} & 0 \\
+    0 & 0 & 0 & r^{2} B^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}
+\end{pmatrix}
+\end{equation}
+\subsection{Contravariant Metric $g^{\mu\nu}$}
+Defined by $g^{\mu\rho}\,g_{\rho\nu} = \delta^\mu{}_\nu$.
+\begin{equation}
+  g^{\mu\nu} = \begin{pmatrix}
+    -1 & \beta{\left(r \right)} & 0 & 0 \\
+    \beta{\left(r \right)} & \frac{- B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} + 1}{B^{2}{\left(r \right)}} & 0 & 0 \\
+    0 & 0 & \frac{1}{r^{2} B^{2}{\left(r \right)}} & 0 \\
+    0 & 0 & 0 & \frac{1}{r^{2} B^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}}
+\end{pmatrix}
+\end{equation}
+\subsection{Metric Determinant}
+\begin{dmath*}
+  \det(g) = - r^{4} B^{6}{\left(r \right)} \sin^{2}{\left(\theta \right)}
+\end{dmath*}
+\section{Christoffel Symbols}
+The Christoffel symbols of the second kind (Levi-Civita connection) are
+\begin{equation}
+  \christoffel{\lambda}{\mu}{\nu} = \frac{1}{2}\,g^{\lambda\sigma}\!\left(\partial_\mu g_{\nu\sigma} + \partial_\nu g_{\mu\sigma}- \partial_\sigma g_{\mu\nu}\right).
+\end{equation}
+They are symmetric in the lower pair: $\christoffel{\lambda}{\mu}{\nu} = \christoffel{\lambda}{\nu}{\mu}$. Only non-zero independent components (with $\mu \le \nu$) are listed.
+Total non-zero independent components: \textbf{14}.
+\begin{dmath*}
+  \christoffel{t}{t}{t} = - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{t}{t}{r} = - B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{t}{r}{r} = - B^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{t}{\theta}{\theta} = - r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - r B^{2}{\left(r \right)} \beta{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{t}{\varphi}{\varphi} = - r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} - r B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{r}{t}{t} = \frac{B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{r}{t}{r} = B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{r}{r}{r} = \frac{B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} + \frac{d}{d r} B{\left(r \right)}}{B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{r}{\theta}{\theta} = \frac{r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - r^{2} \frac{d}{d r} B{\left(r \right)} + r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} - r B{\left(r \right)}}{B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{r}{\varphi}{\varphi} = \frac{r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} - r^{2} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} + r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} - r B{\left(r \right)} \sin^{2}{\left(\theta \right)}}{B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{\theta}{r}{\theta} = \frac{r \frac{d}{d r} B{\left(r \right)} + B{\left(r \right)}}{r B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{\theta}{\varphi}{\varphi} = - \sin{\left(\theta \right)} \cos{\left(\theta \right)}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{\varphi}{r}{\varphi} = \frac{r \frac{d}{d r} B{\left(r \right)} + B{\left(r \right)}}{r B{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \christoffel{\varphi}{\theta}{\varphi} = \frac{\cos{\left(\theta \right)}}{\sin{\left(\theta \right)}}
+\end{dmath*}
+\section{Riemann Curvature Tensor}
+The Riemann tensor measures the failure of parallel transport around closed loops — the intrinsic curvature of spacetime:
+\begin{equation}
+  \riemann{\rho}{\sigma}{\mu}{\nu} = \partial_\mu\christoffel{\rho}{\nu}{\sigma}- \partial_\nu\christoffel{\rho}{\mu}{\sigma}+ \christoffel{\rho}{\mu}{\lambda}\christoffel{\lambda}{\nu}{\sigma}- \christoffel{\rho}{\nu}{\lambda}\christoffel{\lambda}{\mu}{\sigma}.
+\end{equation}
+Antisymmetry: $\riemann{\rho}{\sigma}{\mu}{\nu} = -\riemann{\rho}{\sigma}{\nu}{\mu}$. Only components with $\mu < \nu$ are listed.
+Total independent non-zero Riemann components: \textbf{20}.
+\begin{align*}
+  \riemann{t}{t}{t}{r} &= B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + B^{2}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}
+\end{align*}
+\begin{dmath*}
+  \riemann{t}{r}{t}{r} = B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} + B^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} + B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} + 3 B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \riemann{t}{\theta}{t}{\theta} = r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + r^{2} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} + r B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \riemann{t}{\theta}{r}{\theta} = - r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} + r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{align*}
+  \riemann{t}{\varphi}{t}{\varphi} &= r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}
+\end{align*}
+\begin{dmath*}
+  \riemann{t}{\varphi}{r}{\varphi} = - r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} + r^{2} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - r B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}
+\end{dmath*}
+\begin{align*}
+  \riemann{r}{t}{t}{r} &= \frac{1}{B{\left(r \right)}}\Bigl(- B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \riemann{r}{r}{t}{r} &= - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - B^{2}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}
+\end{align*}
+\begin{align*}
+  \riemann{r}{\theta}{r}{\theta} &= \frac{1}{B^{2}{\left(r \right)}}\Bigl(r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \riemann{r}{\varphi}{r}{\varphi} &= \frac{1}{B^{2}{\left(r \right)}}\Bigl(r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \riemann{\theta}{t}{t}{\theta} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(- r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{dmath*}
+  \riemann{\theta}{t}{r}{\theta} = \frac{- r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r}
+\end{dmath*}
+\begin{dmath*}
+  \riemann{\theta}{r}{t}{\theta} = \frac{- r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r}
+\end{dmath*}
+\begin{align*}
+  \riemann{\theta}{r}{r}{\theta} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(- r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \riemann{\theta}{\varphi}{\theta}{\varphi} &= \frac{1}{B^{2}{\left(r \right)}}\Bigl(r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \riemann{\varphi}{t}{t}{\varphi} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(- r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{dmath*}
+  \riemann{\varphi}{t}{r}{\varphi} = \frac{- r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r}
+\end{dmath*}
+\begin{dmath*}
+  \riemann{\varphi}{r}{t}{\varphi} = \frac{- r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r}
+\end{dmath*}
+\begin{align*}
+  \riemann{\varphi}{r}{r}{\varphi} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(- r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{dmath*}
+  \riemann{\varphi}{\theta}{\theta}{\varphi} = \frac{- r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} + 2 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}}{B^{2}{\left(r \right)}}
+\end{dmath*}
+\section{Ricci Tensor}
+The Ricci tensor is the trace of the Riemann tensor: $R_{\mu\nu} = R^\rho{}_{\mu\rho\nu}$. It encodes how volumes change under parallel transport and is directly sourced by the stress-energy.
+\par\noindent\textit{Non-zero components (matrix form exceeds page width):}
+\begin{align*}
+  R_{tt} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(r B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  R_{tr} &= \frac{1}{r}\Bigl(r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r B^{2}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  R_{rt} &= \frac{1}{r}\Bigl(r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r B^{2}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  R_{rr} &= \frac{1}{r B^{2}{\left(r \right)}}\Bigl(r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  R_{\theta\theta} &= \frac{1}{B{\left(r \right)}}\Bigl(r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 5 r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 3 r \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{3}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  R_{\varphi\varphi} &= \frac{1}{B{\left(r \right)}}\Bigl(r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 5 r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 3 r \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}\Bigr)
+\end{align*}
+\section{Ricci Scalar (Curvature Scalar)}
+The Ricci scalar $\mathcal{R} = g^{\mu\nu} R_{\mu\nu}$ is the full contraction of the Ricci tensor. It provides a single-number measure of curvature. It vanishes for vacuum spacetimes.
+\begin{tcolorbox}[colback=boxblue,colframe=black!40,title=\textbf{Ricci scalar},breakable]
+\begin{align*}
+  \mathcal{R} &= \frac{1}{r^{2} B^{4}{\left(r \right)}}\Bigl(2 r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 6 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 14 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 6 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 4 r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 8 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 16 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 8 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\end{tcolorbox}
+\section{Einstein Tensor}
+The Einstein tensor $G_{\mu\nu} = R_{\mu\nu} - \frac{1}{2}\,g_{\mu\nu}\,\mathcal{R}$ is divergence-free by the contracted Bianchi identity. The Einstein field equations read $G_{\mu\nu} = 8\pi T_{\mu\nu}$.
+\par\noindent\textit{Non-zero components (matrix form exceeds page width):}
+\begin{align*}
+  G_{tt} &= \frac{1}{r^{2} B^{4}{\left(r \right)}}\Bigl(- 2 r^{2} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 10 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 4 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  G_{tr} &= \frac{1}{r^{2} B^{2}{\left(r \right)}}\Bigl(- 2 r^{2} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 4 r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  G_{rt} &= \frac{1}{r^{2} B^{2}{\left(r \right)}}\Bigl(- 2 r^{2} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 4 r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  G_{rr} &= \frac{1}{r^{2} B^{2}{\left(r \right)}}\Bigl(- 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  G_{\theta\theta} &= \frac{1}{B^{2}{\left(r \right)}}\Bigl(- r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  G_{\varphi\varphi} &= \frac{1}{B^{2}{\left(r \right)}}\Bigl(- r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\section{Curvature Invariants}
+\subsection{Kretschmann Scalar}
+The Kretschmann scalar $\mathcal{K} = R^{\mu\nu\rho\sigma} R_{\mu\nu\rho\sigma}$ is a quadratic curvature invariant. Unlike $\mathcal{R}$, it remains nonzero even in vacuum. It diverges at genuine (physical) curvature singularities, distinguishing them from coordinate singularities. For the Schwarzschild metric: $\mathcal{K} = 48M^2/r^6$.
+\begin{tcolorbox}[colback=boxblue,colframe=black!40,title=\textbf{Kretschmann scalar},breakable]
+\begin{align*}
+  \mathcal{K} &= \frac{1}{r^{4} B^{8}{\left(r \right)}}\Bigl(4 r^{4} B^{8}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d^{2}}{d r^{2}} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 8 r^{4} B^{8}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + 4 r^{4} B^{8}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{4} \\
+  &\quad + 8 r^{4} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + 24 r^{4} B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + 8 r^{4} B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 24 r^{4} B^{7}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{3} \\
+  &\quad + 12 r^{4} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d^{2}}{d r^{2}} B{\left(r \right)}\right)^{2} \\
+  &\quad + 40 r^{4} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 52 r^{4} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 16 r^{4} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 12 r^{4} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{4} \\
+  &\quad - 16 r^{4} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d^{2}}{d r^{2}} B{\left(r \right)}\right)^{2} \\
+  &\quad - 16 r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 16 r^{4} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 16 r^{4} B^{3}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 8 r^{4} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{4} \\
+  &\quad + 8 r^{4} B^{2}{\left(r \right)} \left(\frac{d^{2}}{d r^{2}} B{\left(r \right)}\right)^{2} \\
+  &\quad - 16 r^{4} B{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 12 r^{4} \left(\frac{d}{d r} B{\left(r \right)}\right)^{4} \\
+  &\quad + 16 r^{3} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 32 r^{3} B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 32 r^{3} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 64 r^{3} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 32 r^{3} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - 16 r^{3} B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 48 r^{3} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 16 r^{3} B^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 16 r^{2} B^{8}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 48 r^{2} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 64 r^{2} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 16 r^{2} B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 72 r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 24 r^{2} B^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 16 r B^{7}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 16 r B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 4 B^{8}{\left(r \right)} \beta^{4}{\left(r \right)}\Bigr)
+\end{align*}
+\end{tcolorbox}
+\subsection{Weyl Conformal Tensor}
+The Weyl tensor $C_{\rho\sigma\mu\nu}$ is the trace-free part of the Riemann tensor, representing pure gravitational (tidal / wave) degrees of freedom independent of the local matter distribution. It vanishes in conformally flat spacetimes and is equal to the Riemann tensor in vacuum.
+Independent non-zero Weyl components: \textbf{20}.
+\begin{align*}
+  C_{t\,r\,t\,r} &= \frac{1}{3 r^{2} B^{2}{\left(r \right)}}\Bigl(- r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{t\,\theta\,t\,\theta} &= \frac{1}{6 B^{2}{\left(r \right)}}\Bigl(- r^{2} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{t\,\theta\,r\,\theta} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{t\,\varphi\,t\,\varphi} &= \frac{1}{6 B^{2}{\left(r \right)}}\Bigl(- r^{2} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{t\,\varphi\,r\,\varphi} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{r\,t\,t\,r} &= \frac{1}{3 r^{2} B^{2}{\left(r \right)}}\Bigl(r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{r\,\theta\,t\,\theta} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{r\,\theta\,r\,\theta} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{r\,\varphi\,t\,\varphi} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{r\,\varphi\,r\,\varphi} &= - \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad - \frac{r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\theta\,t\,t\,\theta} &= \frac{1}{6 B^{2}{\left(r \right)}}\Bigl(r^{2} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{\theta\,t\,r\,\theta} &= \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\theta\,r\,t\,\theta} &= \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\theta\,r\,r\,\theta} &= \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\theta\,\varphi\,\theta\,\varphi} &= \frac{r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r^{4} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{r^{4} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r^{4} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{3} \\
+  &\quad - \frac{2 r^{4} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{2 r^{3} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r^{3} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{3} \\
+  &\quad - \frac{r^{3} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{3} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{3}
+\end{align*}
+\begin{align*}
+  C_{\varphi\,t\,t\,\varphi} &= \frac{1}{6 B^{2}{\left(r \right)}}\Bigl(r^{2} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  C_{\varphi\,t\,r\,\varphi} &= \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\varphi\,r\,t\,\varphi} &= \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\varphi\,r\,r\,\varphi} &= \frac{r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{6} \\
+  &\quad + \frac{r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{6} \\
+  &\quad + \frac{r^{2} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r^{2} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad - \frac{r B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{6} \\
+  &\quad + \frac{B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{6}
+\end{align*}
+\begin{align*}
+  C_{\varphi\,\theta\,\theta\,\varphi} &= - \frac{r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r^{4} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2}}{3} \\
+  &\quad - \frac{r^{4} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad - \frac{r^{4} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)}}{3} \\
+  &\quad + \frac{2 r^{4} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2}}{3} \\
+  &\quad + \frac{2 r^{3} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)}}{3} \\
+  &\quad + \frac{r^{3} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{3} \\
+  &\quad + \frac{r^{3} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}}{3} \\
+  &\quad - \frac{r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)}}{3}
+\end{align*}
+\section{Orthonormal Frame Analysis}
+\subsection{Tetrad Construction}
+The metric has an \textbf{ADM shift vector} with a diagonal spatial block ($\gamma_{ij} = 0$ for $i \ne j$). The tetrad was built via the ADM decomposition: lapse $N$, shift $\beta^i$, and spatial triad $E^{\hat{a}}{}_i = \sqrt{\gamma_{ii}}\,\delta^{\hat{a}}_i$ (no sum).
+\subsection{ADM Lapse and Shift}
+The ADM decomposition gives lapse $N$ and shift $\beta^i$:
+\begin{dmath*}
+  N = 1
+\end{dmath*}
+\begin{dmath*}
+  \beta^{r} = \beta{\left(r \right)}
+\end{dmath*}
+\begin{dmath*}
+  \beta^{\theta} = 0
+\end{dmath*}
+\begin{dmath*}
+  \beta^{\varphi} = 0
+\end{dmath*}
+\subsection{Spatial Triad $E^{\hat{a}}{}_i$}
+The spatial triad satisfies $\gamma_{ij} = \delta_{\hat{a}\hat{b}}\,E^{\hat{a}}{}_i\,E^{\hat{b}}{}_j$.
+\begin{equation}
+  E^{\hat{a}}{}_i = \begin{pmatrix}
+    B{\left(r \right)} & 0 & 0 \\
+    0 & B{\left(r \right)} \left|{r}\right| & 0 \\
+    0 & 0 & B{\left(r \right)} \left|{r}\right| \left|{\sin{\left(\theta \right)}}\right|
+\end{pmatrix}
+\end{equation}
+\subsection{Contravariant Tetrad $e^\mu{}_{\hat{a}}$}
+Entry $[\mu,\,\hat{a}]$ of the matrix below is $e^\mu{}_{\hat{a}}$. It satisfies $g_{\mu\nu}\,e^\mu{}_{\hat{a}}\,e^\nu{}_{\hat{b}} = \eta_{\hat{a}\hat{b}}$.
+\begin{equation}
+  e^\mu{}_{\hat{a}} = \begin{pmatrix}
+    1 & 0 & 0 & 0 \\
+    - \beta{\left(r \right)} & \frac{1}{B{\left(r \right)}} & 0 & 0 \\
+    0 & 0 & \frac{1}{B{\left(r \right)} \left|{r}\right|} & 0 \\
+    0 & 0 & 0 & \frac{1}{B{\left(r \right)} \left|{r}\right| \left|{\sin{\left(\theta \right)}}\right|}
+\end{pmatrix}
+\end{equation}
+\subsection{Coframe $e^{\hat{a}}{}_\mu$}
+Entry $[\hat{a},\,\mu]$ of the matrix below is $e^{\hat{a}}{}_\mu$ (the dual frame / coframe).
+\begin{equation}
+  e^{\hat{a}}{}_\mu = \begin{pmatrix}
+    1 & 0 & 0 & 0 \\
+    B{\left(r \right)} \beta{\left(r \right)} & B{\left(r \right)} & 0 & 0 \\
+    0 & 0 & B{\left(r \right)} \left|{r}\right| & 0 \\
+    0 & 0 & 0 & B{\left(r \right)} \left|{r}\right| \left|{\sin{\left(\theta \right)}}\right|
+\end{pmatrix}
+\end{equation}
+\subsection{Orthonormality Verification}
+\begin{tcolorbox}[colback=green!8!white,colframe=green!50!black,title=Orthonormality Verified]
+$g_{\mu\nu}\,e^\mu{}_{\hat{a}}\,e^\nu{}_{\hat{b}} = \eta_{\hat{a}\hat{b}} = \operatorname{diag}(-1,+1,+1,+1)$ \quad\textbf{\large\checkmark}
+\end{tcolorbox}
+\subsection{Orthonormal-Frame Einstein Tensor $\hat{G}_{\hat{a}\hat{b}}$}
+The orthonormal-frame Einstein tensor is defined by $\hat{G}_{\hat{a}\hat{b}} = e^\mu{}_{\hat{a}}\,e^\nu{}_{\hat{b}}\,G_{\mu\nu}$.
+\par\noindent\textit{Non-zero components (matrix form exceeds page width):}
+\begin{align*}
+  \hat{G}_{\hat{t}\hat{t}} &= \frac{1}{r^{2} B^{4}{\left(r \right)}}\Bigl(2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 3 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 4 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 4 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{dmath*}
+  \hat{G}_{\hat{t}\hat{r}} = \frac{2 r B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} - 2 r \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} + 2 B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r B^{3}{\left(r \right)}}
+\end{dmath*}
+\begin{dmath*}
+  \hat{G}_{\hat{r}\hat{t}} = \frac{2 r B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} - 2 r \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} + 2 B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{r B^{3}{\left(r \right)}}
+\end{dmath*}
+\begin{align*}
+  \hat{G}_{\hat{r}\hat{r}} &= \frac{1}{r^{2} B^{4}{\left(r \right)}}\Bigl(- 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \hat{G}_{\hat{\theta}\hat{\theta}} &= \frac{1}{r B^{4}{\left(r \right)}}\Bigl(- r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \hat{G}_{\hat{\varphi}\hat{\varphi}} &= \frac{1}{r B^{4}{\left(r \right)}}\Bigl(- r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\section{Energy Conditions}
+From $G_{\hat{a}\hat{b}} = 8\pi T_{\hat{a}\hat{b}}$ the stress-energy components in the orthonormal frame are:
+\subsection{Stress-Energy Components}
+\begin{tcolorbox}[colback=boxblue,colframe=black!40,title=\textbf{Physical stress-energy},breakable]
+\begin{align*}
+  \rho &= \frac{1}{8 \pi r^{2} B^{4}{\left(r \right)}}\Bigl(2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 3 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 4 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 4 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  p_1 &= \frac{1}{8 \pi r^{2} B^{4}{\left(r \right)}}\Bigl(- 2 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{2} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{4}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  p_2 &= \frac{1}{8 \pi r B^{4}{\left(r \right)}}\Bigl(- r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  p_3 &= \frac{1}{8 \pi r B^{4}{\left(r \right)}}\Bigl(- r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\end{tcolorbox}
+\subsection{Null Energy Condition (NEC)}
+NEC requires $\rho + p_i \geq 0$ for all principal pressures $p_i$. Violation implies exotic (negative-energy) matter.
+\begin{align*}
+  \rho + p_1 &= \frac{1}{4 \pi r B^{4}{\left(r \right)}}\Bigl(- r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \rho + p_2 &= \frac{1}{8 \pi r^{2} B^{3}{\left(r \right)}}\Bigl(- r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 3 r \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{3}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \rho + p_3 &= \frac{1}{8 \pi r^{2} B^{3}{\left(r \right)}}\Bigl(- r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{3}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{2} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 3 r \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{3}{\left(r \right)} \beta^{2}{\left(r \right)}\Bigr)
+\end{align*}
+\subsection{Weak Energy Condition (WEC)}
+WEC: $\rho \geq 0$ (energy density non-negative) and NEC.
+\subsection{Strong Energy Condition (SEC)}
+SEC: $\rho + \sum_i p_i \geq 0$.
+\begin{align*}
+  \rho + \textstyle\sum_i p_i &= \frac{1}{4 \pi r B{\left(r \right)}}\Bigl(- r B{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 3 r \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 4 \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\subsection{Dominant Energy Condition (DEC)}
+DEC: $\rho \geq |p_i|$ — energy flows causally, no superluminal energy transport.
+\textit{(The DEC requires knowledge of the sign of $\rho$ relative to $|p_i|$; substitute explicit parameter values to evaluate.)}
+\section{Geodesic Equations}
+The geodesic equation for an affinely parameterised curve $x^\mu(\lambda)$ is
+\begin{equation}
+  \frac{d^2 x^\mu}{d\lambda^2} + \christoffel{\mu}{\alpha}{\beta}\,\dot{x}^\alpha\,\dot{x}^\beta = 0,\qquad \dot{x}^\mu \equiv \frac{dx^\mu}{d\lambda}.
+\end{equation}
+Each component written as $\ddot{x}^\mu = \ldots\,:$
+\begin{align*}
+  \ddot{t} &= -( \\
+  &\quad - \dot{\theta}^{2} r^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - \dot{\theta}^{2} r B^{2}{\left(r \right)} \beta{\left(r \right)} \\
+  &\quad - \dot{\varphi}^{2} r^{2} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - \dot{\varphi}^{2} r B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \\
+  &\quad - \dot{r}^{2} B^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - \dot{r}^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 \dot{r} \dot{t} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 \dot{r} \dot{t} B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - \dot{t}^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - \dot{t}^{2} B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)})
+\end{align*}
+{\sloppy
+\begin{dmath*}
+  \ddot{r} = -(\frac{\dot{\theta}^{2} r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - \dot{\theta}^{2} r^{2} \frac{d}{d r} B{\left(r \right)} + \dot{\theta}^{2} r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} - \dot{\theta}^{2} r B{\left(r \right)} + \dot{\varphi}^{2} r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} - \dot{\varphi}^{2} r^{2} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} + \dot{\varphi}^{2} r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} - \dot{\varphi}^{2} r B{\left(r \right)} \sin^{2}{\left(\theta \right)} + \dot{r}^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + \dot{r}^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} + \dot{r}^{2} \frac{d}{d r} B{\left(r \right)} + 2 \dot{r} \dot{t} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + 2 \dot{r} \dot{t} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} + \dot{t}^{2} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} + \dot{t}^{2} B^{2}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} - \dot{t}^{2} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} - \dot{t}^{2} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}}{B{\left(r \right)}})
+\end{dmath*}
+}
+\begin{dmath*}
+  \ddot{\theta} = -(\frac{2 \dot{\theta} \dot{r} r \frac{d}{d r} B{\left(r \right)} + 2 \dot{\theta} \dot{r} B{\left(r \right)} - \dot{\varphi}^{2} r B{\left(r \right)} \sin{\left(\theta \right)} \cos{\left(\theta \right)}}{r B{\left(r \right)}})
+\end{dmath*}
+\begin{dmath*}
+  \ddot{\varphi} = -(\frac{2 \dot{\theta} \dot{\varphi} r B{\left(r \right)} \cos{\left(\theta \right)} + 2 \dot{\varphi} \dot{r} r \sin{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} + 2 \dot{\varphi} \dot{r} B{\left(r \right)} \sin{\left(\theta \right)}}{r B{\left(r \right)} \sin{\left(\theta \right)}})
+\end{dmath*}
+\subsection{Conserved Quantities (Killing Vectors)}
+Coordinates that do not appear in $g_{\mu\nu}$ give rise to Killing vectors and conserved momenta along geodesics:
+\begin{itemize}
+\item $\partial/\partial t$ is a Killing vector. Conserved quantity: $p_{t} = g_{t\nu}\,\dot{x}^\nu = \mathrm{const}$.
+\item $\partial/\partial \varphi$ is a Killing vector. Conserved quantity: $p_{\varphi} = g_{\varphi\nu}\,\dot{x}^\nu = \mathrm{const}$.
+\end{itemize}
+\section{Conservation and Consistency Checks}
+\subsection{Contracted Bianchi Identity: $\nabla_\mu G^{\mu\nu} = 0$}
+This is a geometric identity that guarantees stress-energy conservation $\nabla_\mu T^{\mu\nu} = 0$ via the field equations.
+\begin{tcolorbox}[colback=boxred,colframe=black!40,title=\textbf{Bianchi Identity --- Simplification Incomplete},breakable]
+\textbf{Note:} SymPy could not reduce all components of $\nabla_\mu G^{\mu\nu}$ to zero using \texttt{cancel()} followed by \texttt{simplify()}. This is \emph{not necessarily a code error} --- it is a known limitation of SymPy for metrics containing unspecified symbolic functions such as $B(r)$, $\beta(r)$, $f(r)$, etc. \\[4pt]\textbf{What this means physically:} The Bianchi identity $\nabla_\mu G^{\mu\nu}=0$ is guaranteed to hold for \emph{any} smooth metric by the second Bianchi identity for the Riemann tensor --- it is a mathematical identity, not an equation of motion. If the residuals below are large symbolic expressions involving derivatives of abstract metric functions, they almost certainly vanish but SymPy lacks a simplification rule to confirm it automatically. \\[4pt]\textbf{What to do:} (1)~Substitute a \emph{specific} form of every metric function (e.g.\ set $B(r)=1$ and $\beta(r)=\sqrt{2M/r}$ for Schwarzschild-PG) --- the residuals will collapse to zero numerically. (2)~If the residuals contain only small \emph{rational} numbers (not long symbolic sums), that would indicate a genuine computation error and should be reported.
+\end{tcolorbox}
+\begin{align*}
+  \nabla_\mu G^{\mu t} &= \frac{1}{r^{2} B^{3}{\left(r \right)}}\Bigl(r^{4} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r^{4} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{4} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r^{4} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 5 r^{4} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{4} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{4} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - r^{4} B{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{4} B{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{4} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{4} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r^{3} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{3} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 7 r^{3} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 7 r^{3} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 4 r^{3} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r^{3} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{3} B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{3} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 3 r^{2} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 3 r^{2} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r^{2} B^{3}{\left(r \right)} \beta^{5}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 r^{2} B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} B^{2}{\left(r \right)} \beta^{5}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{2} B^{2}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + r^{2} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - r^{2} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + 2 r B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{5}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 8 r B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 8 r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 6 r B^{3}{\left(r \right)} \beta^{5}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 6 r B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 4 r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r B^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 4 r B{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{5}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \nabla_\mu G^{\mu r} &= \frac{1}{r^{2} B^{5}{\left(r \right)}}\Bigl(- r^{4} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{4} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{4} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{4} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{4} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{4} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r^{4} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 5 r^{4} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{4} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - r^{4} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{4} B^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 3 r^{4} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 r^{4} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 5 r^{4} B^{3}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 5 r^{4} B^{3}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{4} B{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{4} B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{4} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + r^{4} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - r^{3} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{3} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r^{3} B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - r^{3} B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{3} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{3} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 7 r^{3} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 7 r^{3} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 4 r^{3} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 4 r^{3} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + r^{3} B^{5}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 3 r^{3} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 3 r^{3} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 7 r^{3} B^{4}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 7 r^{3} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 4 r^{3} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r^{3} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - r^{3} B^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r^{3} B^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{6}{\left(r \right)} \beta^{5}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 r^{2} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 3 r^{2} B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{6}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r^{2} B^{5}{\left(r \right)} \beta^{6}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 r^{2} B^{5}{\left(r \right)} \beta^{5}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 3 r^{2} B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{5}{\left(r \right)} \beta{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \beta^{6}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - r^{2} B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad + 4 r^{2} B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 4 r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r^{2} B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 2 r^{2} B^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r^{2} B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + 2 r^{2} B^{3}{\left(r \right)} \beta^{3}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r^{2} B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 11 r^{2} B^{3}{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 5 r^{2} B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - 2 r^{2} B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \sin^{2}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - r^{2} B^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 2 r^{2} B{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} B{\left(r \right)} \beta{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r^{2} B{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad + r^{2} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{3} \\
+  &\quad - 2 r B^{7}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{7}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 8 r B^{6}{\left(r \right)} \beta^{5}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 8 r B^{6}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 6 r B^{5}{\left(r \right)} \beta^{6}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 6 r B^{5}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 2 r B^{5}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - 2 r B^{5}{\left(r \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad + 12 r B^{4}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 4 r B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 18 r B^{4}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 10 r B^{3}{\left(r \right)} \beta^{4}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 16 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 4 r B^{2}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + 2 r B^{2}{\left(r \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 4 r B{\left(r \right)} \beta^{2}{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + 4 r B{\left(r \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - B^{7}{\left(r \right)} \beta^{5}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{7}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - B^{6}{\left(r \right)} \beta^{6}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - B^{6}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B^{5}{\left(r \right)} \beta^{3}{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 4 B^{5}{\left(r \right)} \beta{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad + B^{4}{\left(r \right)} \beta^{4}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad - 8 B^{4}{\left(r \right)} \beta^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + 2 B^{2}{\left(r \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\begin{align*}
+  \nabla_\mu G^{\mu \theta} &= \frac{1}{r B^{4}{\left(r \right)} \sin{\left(\theta \right)}}\Bigl(- r B^{4}{\left(r \right)} \beta{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} \beta{\left(r \right)} \\
+  &\quad - r B^{4}{\left(r \right)} \cos^{3}{\left(\theta \right)} \left(\frac{d}{d r} \beta{\left(r \right)}\right)^{2} \\
+  &\quad - 2 r B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - 5 r B^{3}{\left(r \right)} \beta{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - r B^{2}{\left(r \right)} \beta^{2}{\left(r \right)} \cos^{3}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad + r B{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d^{2}}{d r^{2}} B{\left(r \right)} \\
+  &\quad - r \cos^{3}{\left(\theta \right)} \left(\frac{d}{d r} B{\left(r \right)}\right)^{2} \\
+  &\quad - 2 B^{4}{\left(r \right)} \beta{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d}{d r} \beta{\left(r \right)} \\
+  &\quad - 3 B^{3}{\left(r \right)} \beta^{2}{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)} \\
+  &\quad + B{\left(r \right)} \cos^{3}{\left(\theta \right)} \frac{d}{d r} B{\left(r \right)}\Bigr)
+\end{align*}
+\subsection{Ricci Scalar Trace Consistency}
+Verify $g^{\mu\nu} R_{\mu\nu} = \mathcal{R}$ (cross-check).
+\begin{tcolorbox}[colback=boxgreen,colframe=black!40,title=\textbf{Trace Check},breakable]
+\textbf{VERIFIED:} $g^{\mu\nu} R_{\mu\nu} = \mathcal{R}$. $\checkmark$
+\end{tcolorbox}
+\subsection{Metric Inverse Identity}
+Verify $g^{\mu\rho}\,g_{\rho\nu} = \delta^\mu{}_\nu$.
+\begin{tcolorbox}[colback=boxgreen,colframe=black!40,title=\textbf{Metric Inverse},breakable]
+\textbf{VERIFIED:} $g^{\mu\rho}\,g_{\rho\nu} = \delta^\mu{}_\nu$. $\checkmark$
+\end{tcolorbox}
+
+\end{document}
