@@ -1,0 +1,1743 @@
+% ==============================================================================
+%  GR Calculator — User Manual
+%  Compile with:  pdflatex GR_Manual.tex  (run twice for correct TOC)
+% ==============================================================================
+\documentclass[11pt,a4paper]{article}
+
+% --- Encoding & fonts ---------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% --- Page geometry ------------------------------------------------------------
+\usepackage[left=2.5cm,right=2.5cm,top=2.8cm,bottom=2.8cm]{geometry}
+
+% --- Math ---------------------------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm}
+
+% --- Colors -------------------------------------------------------------------
+\usepackage[dvipsnames,svgnames,table]{xcolor}
+\definecolor{codegreen}{rgb}{0.13,0.55,0.13}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeback}{rgb}{0.97,0.97,0.97}
+\definecolor{codeblue}{rgb}{0.0,0.3,0.7}
+\definecolor{codered}{rgb}{0.7,0.1,0.1}
+\definecolor{headcol}{RGB}{30,80,140}
+\definecolor{rowgray}{RGB}{240,243,248}
+\definecolor{warnbg}{RGB}{255,248,220}
+\definecolor{tipbg}{RGB}{230,255,230}
+\definecolor{notebg}{RGB}{230,240,255}
+
+% --- Code listings ------------------------------------------------------------
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\small\ttfamily,
+  keywordstyle=\color{codeblue}\bfseries,
+  stringstyle=\color{codered},
+  commentstyle=\color{codegray}\itshape,
+  numberstyle=\tiny\color{codegray},
+  numbers=left,
+  numbersep=5pt,
+  backgroundcolor=\color{codeback},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!40},
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  captionpos=b,
+  xleftmargin=12pt,
+  xrightmargin=4pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  morekeywords={symbols,Function,Matrix,sqrt,sin,cos,exp,True,False,None},
+}
+
+% Inline code helper
+\newcommand{\code}[1]{\texttt{\small#1}}
+
+% --- Colored boxes ------------------------------------------------------------
+\usepackage[most]{tcolorbox}
+\tcbset{
+  colback=notebg, colframe=headcol!60,
+  fonttitle=\small\bfseries, coltitle=white, colbacktitle=headcol!80,
+  boxrule=0.5pt, arc=3pt, left=6pt, right=6pt,
+}
+\newtcolorbox{notebox}[1][Note]{
+  title=#1, colback=notebg, colframe=headcol!60,
+  colbacktitle=headcol!80, coltitle=white,
+}
+\newtcolorbox{warnbox}[1][Warning]{
+  title=#1, colback=warnbg, colframe=orange!80,
+  colbacktitle=orange!80, coltitle=black,
+}
+\newtcolorbox{tipbox}[1][Tip]{
+  title=#1, colback=tipbg, colframe=codegreen!70,
+  colbacktitle=codegreen!70, coltitle=white,
+}
+
+% --- Tables -------------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.25}
+
+% --- Lists --------------------------------------------------------------------
+\usepackage{enumitem}
+\setlist[itemize]{topsep=3pt,itemsep=2pt,parsep=0pt}
+\setlist[enumerate]{topsep=3pt,itemsep=2pt,parsep=0pt}
+
+% --- Section formatting -------------------------------------------------------
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries\color{headcol}}{%
+  \thesection}{0.8em}{}[\color{headcol!40}\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{headcol!80}}{%
+  \thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{headcol!60}}{%
+  \thesubsubsection}{0.6em}{}
+
+% --- Paragraph spacing --------------------------------------------------------
+\usepackage{parskip}
+\setlength{\parskip}{5pt}
+
+% --- Hyperlinks ---------------------------------------------------------------
+\usepackage[
+  colorlinks=true,
+  linkcolor=headcol,
+  urlcolor=codeblue,
+  citecolor=codegreen,
+  pdfauthor={GR Calculator},
+  pdftitle={GR Calculator User Manual},
+  pdfsubject={Symbolic General Relativity in Python},
+]{hyperref}
+
+% --- Header / footer ----------------------------------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{gray}GR Calculator — User Manual}
+\fancyhead[R]{\small\color{gray}\leftmark}
+\fancyfoot[C]{\small\color{gray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% --- Math helpers -------------------------------------------------------------
+\renewcommand{\Gamma}{\varGamma}
+\newcommand{\bGamma}{\boldsymbol{\varGamma}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\pa}{\partial}
+\newcommand{\half}{\tfrac{1}{2}}
+
+% ==============================================================================
+\begin{document}
+
+% --- Title page ---------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Huge\bfseries\color{headcol} GR Calculator}\\[0.6em]
+  {\LARGE\bfseries User Manual}\\[1.5em]
+  {\large Symbolic General Relativity Analysis\\powered by SymPy}\\[2em]
+  \rule{0.4\textwidth}{1pt}\\[2em]
+  {\large
+    \begin{tabular}{ll}
+      \textbf{Edition:}    & Desktop (\code{GR\_python/}) \&
+                             Google Colab (\code{GR\_python\_colab/})\\[4pt]
+      \textbf{Language:}   & Python 3.8+\\[4pt]
+      \textbf{Requires:}   & SymPy, pdflatex\\[4pt]
+    \end{tabular}
+  }\\[3em]
+  \vfill
+  {\normalsize\color{gray}
+    This manual covers every configuration option, metric example, and output
+    section of the GR Calculator.  No prior knowledge of the source code is
+    required.}
+\end{titlepage}
+
+% --- TOC ----------------------------------------------------------------------
+\tableofcontents
+\newpage
+
+% ==============================================================================
+\section{Introduction}
+\label{sec:intro}
+% ==============================================================================
+
+The \textbf{GR Calculator} is a Python tool that takes a spacetime metric
+$g_{\mu\nu}$ as input and symbolically computes all standard quantities of
+General Relativity, then assembles the results into a formatted PDF report.
+
+\subsection*{Computed Quantities}
+
+\begin{itemize}
+  \item \textbf{Metric} — covariant $g_{\mu\nu}$, contravariant $g^{\mu\nu}$,
+        and determinant $\det g$
+  \item \textbf{Christoffel symbols} — $\Gamma^\lambda{}_{\mu\nu}$
+        (connection coefficients)
+  \item \textbf{Riemann curvature tensor} — $R^\rho{}_{\sigma\mu\nu}$
+  \item \textbf{Ricci tensor} and \textbf{Ricci scalar} — $R_{\mu\nu}$, $R$
+  \item \textbf{Einstein tensor} — $G_{\mu\nu} = R_{\mu\nu} - \tfrac{1}{2}g_{\mu\nu}R$
+  \item \textbf{Kretschmann scalar} — $K = R^{\mu\nu\rho\sigma}R_{\mu\nu\rho\sigma}$
+        (curvature invariant)
+  \item \textbf{Weyl conformal tensor} — $C_{\rho\sigma\mu\nu}$
+        (trace-free part of Riemann, 4D only)
+  \item \textbf{Orthonormal tetrad} — $e^\mu{}_a$ and its verification
+        $g_{\mu\nu}e^\mu{}_a e^\nu{}_b = \eta_{ab}$
+  \item \textbf{Einstein tensor in orthonormal frame} — $\hat{G}_{ab}$
+  \item \textbf{Energy conditions} — null (NEC), weak (WEC), strong (SEC)
+  \item \textbf{Geodesic equations} —
+        $\dfrac{d^2x^\mu}{d\lambda^2} + \Gamma^\mu{}_{\alpha\beta}
+         \dfrac{dx^\alpha}{d\lambda}\dfrac{dx^\beta}{d\lambda} = 0$
+  \item \textbf{Killing/cyclic coordinates} — conserved momenta
+  \item \textbf{Bianchi identity check} — $\nabla_\mu G^{\mu\nu} = 0$
+  \item \textbf{Ricci trace check} — consistency of the scalar contraction
+\end{itemize}
+
+\subsection*{Two Editions}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Feature & Desktop (\code{GR\_python/}) & Colab (\code{GR\_python\_colab/}) \\
+  \midrule
+  Platform  & Any OS & Google Colab (Linux) \\
+  Entry point & \code{python gr\_calculator.py} & \code{GR\_Colab.ipynb} \\
+  Parallel computation & No & Yes (\code{USE\_PARALLEL}) \\
+  GPU acceleration & No & Yes (\code{USE\_GPU}) \\
+  Numerical evaluation & No & Yes (\code{gr\_numerics.py}) \\
+  Geodesic integration & No & Yes (diffrax / scipy) \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% ==============================================================================
+\section{Prerequisites \& Installation}
+\label{sec:install}
+% ==============================================================================
+
+\subsection{Python Packages}
+
+Install the required packages with pip:
+
+\begin{lstlisting}[language=bash,label={lst:pip},numbers=none]
+pip install sympy matplotlib scipy
+\end{lstlisting}
+
+\begin{itemize}
+  \item \textbf{sympy} (required) — symbolic mathematics engine
+  \item \textbf{matplotlib} — required for the Colab edition plots
+  \item \textbf{scipy} — required for geodesic integration fallback
+\end{itemize}
+
+For the Colab edition with GPU support (optional):
+
+\begin{lstlisting}[language=bash,numbers=none]
+# CuPy -- NVIDIA CUDA GPU acceleration (fastest):
+pip install cupy-cuda12x
+
+# JAX + diffrax -- JIT-compiled geodesic integration:
+pip install "jax[cuda12]" diffrax
+\end{lstlisting}
+
+\begin{notebox}
+  GPU packages are optional.  If neither CuPy nor JAX is installed the
+  numerical cells in the Colab notebook fall back to plain NumPy / SciPy
+  automatically.
+\end{notebox}
+
+\subsection{LaTeX / pdflatex}
+
+The calculator calls \code{pdflatex} to compile the PDF report.  Install a
+TeX distribution appropriate for your operating system:
+
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+  OS & How to install \\
+  \midrule
+  Windows & MiKTeX — \url{https://miktex.org/download} \\
+  Linux & \code{sudo apt install texlive-full} \\
+  macOS & MacTeX — \url{https://tug.org/mactex/} \\
+  Any (online) & Overleaf — \url{https://www.overleaf.com} (upload the .tex file) \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+If \code{pdflatex} is not found the calculator still writes the \code{.tex}
+file and prints manual compilation instructions to the console.
+
+\subsection{File Layout}
+
+\subsubsection*{Desktop Edition (\code{GR\_python/})}
+
+\begin{lstlisting}[language=bash,numbers=none]
+GR_python/
+  gr_calculator.py   # Entry point -- run this file
+  gr_main.py         # User configuration, pipeline, PDF compiler
+  gr_tensors.py      # All symbolic GR computations
+  gr_latex.py        # LaTeX report assembly
+  gr_report.tex      # Generated after first run
+  gr_report.pdf      # Generated after first run (requires pdflatex)
+\end{lstlisting}
+
+\subsubsection*{Colab Edition (\code{GR\_python\_colab/})}
+
+\begin{lstlisting}[language=bash,numbers=none]
+GR_python_colab/
+  GR_Colab.ipynb     # Main notebook -- open in Google Colab
+  gr_main.py         # Adapted from desktop (COLAB_MODE, parallel, GPU flags)
+  gr_tensors.py      # Adapted (adds parallel computation functions)
+  gr_latex.py        # Identical to desktop edition
+  gr_numerics.py     # NEW: numerical evaluation, GPU, geodesic integration
+  README_colab.md    # Quick-start guide
+\end{lstlisting}
+
+% ==============================================================================
+\section{Quick Start}
+\label{sec:quickstart}
+% ==============================================================================
+
+\subsection{Desktop Edition}
+
+\begin{enumerate}
+  \item Open \code{gr\_main.py} in any text editor.
+  \item In \textbf{Section~1.3} (around line 80), find the
+        \emph{Schwarzschild} metric block and remove the comment characters
+        (\code{\#}):
+\begin{lstlisting}
+M = symbols('M', positive=True)
+f = 1 - 2*M/r
+g_metric = Matrix([
+    [-f,    0,    0,                   0              ],
+    [ 0,  1/f,    0,                   0              ],
+    [ 0,    0,  r**2,                  0              ],
+    [ 0,    0,    0,  r**2 * sin(theta)**2             ],
+])
+METRIC_NAME        = "Schwarzschild"
+METRIC_DESCRIPTION = "Exterior vacuum solution"
+\end{lstlisting}
+  \item For your first run, enable fast mode to save time:
+\begin{lstlisting}
+FAST_MODE = True   # skip Weyl and Kretschmann
+\end{lstlisting}
+  \item Run the calculator from a terminal in the \code{GR\_python/} folder:
+\begin{lstlisting}[language=bash,numbers=none]
+python gr_calculator.py
+\end{lstlisting}
+  \item Open the generated \code{gr\_report.pdf}.  Console output shows
+        progress messages with timestamps.
+\end{enumerate}
+
+\begin{tipbox}
+  For a complete run (including Weyl and Kretschmann) with the Schwarzschild
+  metric expect approximately 5--15 minutes.  Set \code{FAST\_MODE = False}
+  only when you want the full invariant analysis.
+\end{tipbox}
+
+\subsection{Google Colab Edition}
+
+\begin{enumerate}
+  \item Upload \code{GR\_Colab.ipynb} to Google Colab
+        (\emph{File $\to$ Upload notebook}).
+  \item Run \textbf{Cell~1} to install LaTeX and Python packages.
+  \item Run \textbf{Cell~2}.  When prompted, upload the four \code{.py} files
+        from \code{GR\_python\_colab/}.  The cell prints the detected GPU
+        backend.
+  \item Edit \textbf{Cell~3} to select your metric and flags (see
+        Section~\ref{sec:config}).
+  \item Run cells 4--8 in order.
+\end{enumerate}
+
+% ==============================================================================
+\section{Configuration Reference}
+\label{sec:config}
+% ==============================================================================
+
+All user configuration lives in \code{gr\_main.py}, in the block labelled
+\textbf{Section 1}.  Each sub-section below corresponds to a numbered part
+of that block.
+
+% ------------------------------------------------------------------------------
+\subsection{Coordinate Symbols (\S1.1)}
+\label{sec:cfg-coords}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.1  COORDINATE SYMBOLS -------------------------------------------------
+t, r, theta, phi = symbols('t r theta phi', real=True)
+coords = [t, r, theta, phi]
+dim    = 4
+\end{lstlisting}
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[\code{coords}]
+    A Python list of SymPy \code{Symbol} objects.  The \emph{order} must
+    match the rows and columns of \code{g\_metric}.  The default is
+    $\{t, r, \theta, \varphi\}$ for 4D spherical coordinates.
+
+  \item[\code{dim}]
+    Integer spacetime dimension.  Default \code{4}.  All tensor loops run
+    over \code{range(dim)}.  Use \code{3} for 2+1 gravity (note: Weyl is
+    automatically skipped for \code{dim $\neq$ 4}).
+\end{description}
+
+\textbf{SymPy assumptions.}  Passing \code{real=True} when creating symbols
+helps SymPy produce cleaner simplifications.  For parameters that are known
+to be positive (e.g.\ mass $M$, radius $r$) use \code{positive=True}:
+
+\begin{lstlisting}
+M = symbols('M', positive=True)
+r = symbols('r', positive=True)
+\end{lstlisting}
+
+\begin{notebox}
+  Any valid SymPy symbol name works for coordinates.  Common choices:
+  $\{t,x,y,z\}$ for Cartesian, $\{t,r,\theta,\varphi\}$ for spherical,
+  $\{t,r,\chi,\psi\}$ for hyperspherical.
+  LaTeX labels are pre-mapped for \code{theta}$\to\theta$,
+  \code{phi}$\to\varphi$, \code{chi}$\to\chi$, \code{psi}$\to\psi$.
+  Any other name prints as-is.
+\end{notebox}
+
+% ------------------------------------------------------------------------------
+\subsection{Metric Parameters (\S1.2)}
+\label{sec:cfg-params}
+% ------------------------------------------------------------------------------
+
+Define symbolic parameters and functions used inside the metric matrix.
+
+\begin{lstlisting}
+# --- 1.2  METRIC PARAMETERS --------------------------------------------------
+M   = symbols('M', positive=True)          # mass
+# a = symbols('a', positive=True)          # spin parameter (Kerr)
+# Lambda = symbols('Lambda')               # cosmological constant
+# a_t = Function('a', positive=True)(t)    # scale factor a(t) for FRW
+# A_r = Function('A')(r)                   # arbitrary radial function
+\end{lstlisting}
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[\code{Symbol} vs.\ \code{Function}]
+    Use \code{symbols()} for constant parameters (e.g.\ mass $M$, charge
+    $Q$, cosmological constant $\Lambda$). \newline
+    Use \code{Function('f')(r)} for functions of coordinates (e.g.\
+    $f(r)$, $a(t)$).  The symbolic derivative of a \code{Function} is
+    computed automatically by SymPy when Christoffel symbols are
+    differentiated.
+
+  \item[Assumptions]
+    \code{positive=True} tells SymPy the symbol is positive, enabling
+    cancellations like $\sqrt{r^2} \to r$ (instead of $|r|$).
+\end{description}
+
+% ------------------------------------------------------------------------------
+\subsection{Metric Tensor \code{g\_metric} (\S1.3)}
+\label{sec:cfg-metric}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.3  METRIC TENSOR g_{mu nu} --------------------------------------------
+g_metric = Matrix([
+    [g_tt, g_tr,   0,   0],
+    [g_tr, g_rr,   0,   0],
+    [  0,    0, g_thth,  0],
+    [  0,    0,   0, g_phph],
+])
+METRIC_NAME        = "My Metric"
+METRIC_DESCRIPTION = "Short description for the PDF header"
+\end{lstlisting}
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[\code{g\_metric}]
+    A $\text{dim}\times\text{dim}$ SymPy \code{Matrix}.  Entry
+    \code{[i,j]} is $g_{x^i x^j}$ (covariant, lower-index metric).
+
+  \item[Signature convention]
+    The calculator uses the mostly-plus signature
+    $(-,+,+,+)$.  The sign of $g_{tt}$ should be negative for a
+    Lorentzian spacetime.
+
+  \item[\code{METRIC\_NAME}]
+    Display string used in the PDF title and progress messages.
+
+  \item[\code{METRIC\_DESCRIPTION}]
+    One-line description included in the PDF abstract.
+\end{description}
+
+% ------------------------------------------------------------------------------
+\subsection{Inverse Metric \code{g\_inv\_metric} (\S1.4)}
+\label{sec:cfg-ginv}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.4  INVERSE METRIC g^{mu nu} -------------------------------------------
+g_inv_metric = None   # None = auto-compute via .inv() (recommended)
+\end{lstlisting}
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[\code{None}]
+    The calculator calls \code{g\_metric.inv()} automatically and applies
+    \code{cancel()} to each entry.  This is the recommended setting.
+
+  \item[Manual matrix]
+    Supply a $\text{dim}\times\text{dim}$ Matrix to skip the inversion step.
+    Useful for large diagonal metrics where \code{.inv()} is slow but the
+    inverse is obvious:
+\end{description}
+
+\begin{lstlisting}
+# Schwarzschild inverse (faster than auto-compute):
+g_inv_metric = Matrix([
+    [-1/f,  0,      0,                    0                   ],
+    [   0,  f,      0,                    0                   ],
+    [   0,  0,  1/r**2,                   0                   ],
+    [   0,  0,      0,   1/(r**2 * sin(theta)**2)             ],
+])
+\end{lstlisting}
+
+% ------------------------------------------------------------------------------
+\subsection{Orthonormal Tetrad \code{e\_tetrad} (\S1.5)}
+\label{sec:cfg-tetrad}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.5  ORTHONORMAL TETRAD e^mu_a ------------------------------------------
+e_tetrad = None   # None = auto-compute if COMPUTE_TETRAD = True
+\end{lstlisting}
+
+The tetrad $e^\mu{}_a$ (also written $e^{(a)}{}_\mu$) is a set of four
+orthonormal vector fields satisfying:
+\[
+  g_{\mu\nu}\, e^\mu{}_a\, e^\nu{}_b \;=\; \eta_{ab}
+  \qquad \text{where}\quad
+  \eta = \mathrm{diag}(-1,+1,+1,+1).
+\]
+
+\begin{description}[leftmargin=2cm,style=nextline]
+  \item[\code{None} + \code{COMPUTE\_TETRAD = True}]
+    The tetrad is computed automatically via ADM decomposition
+    (see Section~\ref{sec:adv-tetrad} for the three cases).
+
+  \item[\code{None} + \code{COMPUTE\_TETRAD = False}]
+    Tetrad computation is skipped entirely; Sections~8--9 of the PDF
+    (orthonormal frame, energy conditions) are omitted.
+
+  \item[User-supplied Matrix]
+    Always takes priority over auto-compute.  Example for Schwarzschild:
+\end{description}
+
+\begin{lstlisting}
+e_tetrad = Matrix([
+    [1/sqrt(f),     0,    0,                  0             ],
+    [        0, sqrt(f),  0,                  0             ],
+    [        0,     0,  1/r,                  0             ],
+    [        0,     0,    0,  1/(r*sin(theta))               ],
+])
+\end{lstlisting}
+
+% ------------------------------------------------------------------------------
+\subsection{LaTeX Substitutions \code{latex\_subs} (\S1.6)}
+\label{sec:cfg-latex}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.6  LATEX SUBSTITUTIONS ------------------------------------------------
+latex_subs = {
+    r'\theta': r'\theta',   # identity example (no change)
+    # r'2 M': r'2M',        # remove space between coefficient and symbol
+}
+\end{lstlisting}
+
+\code{latex\_subs} is a Python \code{dict} mapping raw LaTeX strings to
+replacement strings.  These replacements are applied as simple string
+substitutions \emph{after} SymPy's \code{latex()} conversion and
+\emph{before} the PDF is assembled.
+
+\textbf{Use cases:}
+\begin{itemize}
+  \item Remove unwanted spaces: \code{r'2 M': r'2M'}
+  \item Replace a verbose function name with a compact symbol:
+        \lstinline[language={}]{r'B(r)': r'B(r)'}
+  \item Add custom notation for a parameter
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{Computation Flags (\S1.7)}
+\label{sec:cfg-flags}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.7  COMPUTATION FLAGS --------------------------------------------------
+COMPUTE_WEYL        = True
+COMPUTE_KRETSCHMANN = True
+COMPUTE_GEODESICS   = True
+COMPUTE_KILLING     = True
+COMPUTE_TETRAD      = True
+FAST_MODE           = False
+\end{lstlisting}
+
+\subsubsection{\code{COMPUTE\_WEYL}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Cost & Restriction \\
+  \midrule
+  \code{True} & High (minutes) & 4-dimensional spacetimes only \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Computes the \textbf{Weyl conformal tensor} $C_{\rho\sigma\mu\nu}$
+(all indices lowered).  The Weyl tensor is the trace-free part of the
+Riemann tensor:
+\[
+  C_{\rho\sigma\mu\nu}
+  = R_{\rho\sigma\mu\nu}
+  - \frac{2}{n-2}\bigl(g_{\rho[\mu}R_{\nu]\sigma}
+    - g_{\sigma[\mu}R_{\nu]\rho}\bigr)
+  + \frac{2}{(n-1)(n-2)}\,R\,g_{\rho[\mu}g_{\nu]\sigma}.
+\]
+Physical meaning: Weyl represents pure gravitational field (tidal forces,
+gravitational waves).  It vanishes for conformally flat spacetimes (e.g.,
+FRW cosmology).  In vacuum, $C_{\rho\sigma\mu\nu} = R_{\rho\sigma\mu\nu}$.
+
+Automatically skipped if \code{dim $\neq$ 4}.
+
+\subsubsection{\code{COMPUTE\_KRETSCHMANN}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Cost & Typical time \\
+  \midrule
+  \code{True} & Very high & 5--60 minutes \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Computes the \textbf{Kretschmann scalar}:
+\[
+  K = R^{\mu\nu\rho\sigma}R_{\mu\nu\rho\sigma}.
+\]
+This is a curvature invariant that diverges at genuine (non-coordinate)
+singularities.  It remains finite at coordinate singularities such as the
+Schwarzschild horizon $r=2M$.
+
+\textbf{Example (Schwarzschild):}\quad $K = 48M^2 / r^6$
+
+\begin{warnbox}
+  Computing $K$ symbolically for metrics with abstract functions
+  (e.g.\ $f(r)$, $B(r)$, $\beta(r)$) can take 10--60 minutes.
+  Set \code{COMPUTE\_KRETSCHMANN = False} or \code{FAST\_MODE = True}
+  for initial exploratory runs.
+\end{warnbox}
+
+\subsubsection{\code{COMPUTE\_GEODESICS}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Cost & \\
+  \midrule
+  \code{True} & Low ($< 5$ s) & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Constructs the \textbf{geodesic equations} directly from the Christoffel
+symbols:
+\[
+  \frac{d^2 x^\mu}{d\lambda^2}
+  + \Gamma^\mu{}_{\alpha\beta}
+    \frac{dx^\alpha}{d\lambda}\frac{dx^\beta}{d\lambda} = 0.
+\]
+The output uses abstract velocity symbols $\dot{x}^\mu = dx^\mu/d\lambda$
+(for example \code{dot\_r}, \code{dot\_theta}).
+
+\subsubsection{\code{COMPUTE\_KILLING}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Cost & \\
+  \midrule
+  \code{True} & Low ($< 1$ s) & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Identifies \textbf{cyclic (Killing) coordinates}: a coordinate $x^\mu$ is
+cyclic if
+\[
+  \frac{\partial g_{\alpha\beta}}{\partial x^\mu} = 0
+  \quad \forall\,\alpha,\beta.
+\]
+For each cyclic coordinate the PDF lists the corresponding conserved
+momentum $p_\mu = g_{\mu\nu}\dot{x}^\nu = \mathrm{const}$.
+
+\subsubsection{\code{COMPUTE\_TETRAD}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Cost & \\
+  \midrule
+  \code{True} & Medium & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Enables automatic orthonormal tetrad computation via ADM decomposition.
+The tetrad is used to produce the Einstein tensor in the orthonormal frame
+and to evaluate energy conditions.  A user-supplied \code{e\_tetrad} always
+overrides this flag.
+
+\subsubsection{\code{FAST\_MODE}}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Default & Effect & \\
+  \midrule
+  \code{False} & Skips Weyl \& Kretschmann & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Convenient shortcut for exploratory runs.  When \code{True}, both
+\code{COMPUTE\_WEYL} and \code{COMPUTE\_KRETSCHMANN} are overridden to
+\code{False} regardless of their individual settings.
+
+\begin{tipbox}
+  \textbf{Recommended workflow:}
+  \begin{enumerate}
+    \item First run: \code{FAST\_MODE = True} — quick results,
+          all zero-curvature checks.
+    \item Second run: \code{FAST\_MODE = False} — full invariant analysis.
+  \end{enumerate}
+\end{tipbox}
+
+% ------------------------------------------------------------------------------
+\subsection{Output Options (\S1.8)}
+\label{sec:cfg-output}
+% ------------------------------------------------------------------------------
+
+\begin{lstlisting}
+# --- 1.8  OUTPUT / DISPLAY OPTIONS -------------------------------------------
+OUTPUT_FILENAME = "gr_report"       # base name for .tex and .pdf
+AUTHOR_NAME     = "SymPy GR Engine" # author field in PDF metadata
+\end{lstlisting}
+
+\begin{description}[leftmargin=2.5cm,style=nextline]
+  \item[\code{OUTPUT\_FILENAME}]
+    Base filename (no extension).  The calculator writes
+    \code{<OUTPUT\_FILENAME>.tex} and compiles
+    \code{<OUTPUT\_FILENAME>.pdf} in the same directory as
+    \code{gr\_calculator.py}.  In the Colab edition the output goes to
+    \code{/content/}.
+
+  \item[\code{AUTHOR\_NAME}]
+    String placed in the PDF author field and report header.
+\end{description}
+
+% ==============================================================================
+\section{Pre-Defined Metric Examples}
+\label{sec:metrics}
+% ==============================================================================
+
+Six metric templates are provided as commented-out code blocks in
+\code{gr\_main.py} Section~1.3.  To activate one, remove the \code{\#}
+characters from that block and comment out all other \code{g\_metric =}
+assignments.
+
+% ------------------------------------------------------------------------------
+\subsection{Schwarzschild (Exterior Vacuum)}
+\label{sec:m-schwarz}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -\!\left(1-\frac{2M}{r}\right)dt^2
+         + \left(1-\frac{2M}{r}\right)^{\!-1}dr^2
+         + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+M = symbols('M', positive=True)
+f = 1 - 2*M/r
+g_metric = Matrix([
+    [-f,    0,    0,                   0              ],
+    [ 0,  1/f,    0,                   0              ],
+    [ 0,    0,  r**2,                  0              ],
+    [ 0,    0,    0,  r**2 * sin(theta)**2             ],
+])
+METRIC_NAME        = "Schwarzschild"
+METRIC_DESCRIPTION = "Exterior vacuum solution for a spherically symmetric mass M"
+\end{lstlisting}
+
+\textbf{Expected results:}
+\begin{itemize}
+  \item Ricci tensor: $R_{\mu\nu} = 0$ (vacuum solution)
+  \item Ricci scalar: $R = 0$
+  \item Einstein tensor: $G_{\mu\nu} = 0$
+  \item Kretschmann: $K = 48M^2/r^6$ (diverges at $r=0$, finite at $r=2M$)
+  \item Bianchi identity check: all components $= 0$
+  \item Cyclic coordinates: $t$ and $\varphi$ (energy and angular momentum)
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{Minkowski (Spherical Coordinates)}
+\label{sec:m-mink}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -dt^2 + dr^2 + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+g_metric = Matrix([
+    [-1,  0,     0,              0               ],
+    [ 0,  1,     0,              0               ],
+    [ 0,  0,   r**2,             0               ],
+    [ 0,  0,     0,   r**2 * sin(theta)**2       ],
+])
+METRIC_NAME        = "Minkowski (spherical)"
+METRIC_DESCRIPTION = "Flat Minkowski spacetime in spherical coordinates"
+\end{lstlisting}
+
+\textbf{Use this metric to verify your setup.}  All curvature tensors must
+be identically zero.  Non-zero Christoffel symbols arise from the coordinate
+system (not from curvature):
+$\Gamma^r{}_{\theta\theta} = -r$,
+$\Gamma^\theta{}_{r\theta} = 1/r$, etc.
+
+% ------------------------------------------------------------------------------
+\subsection{FRW (Flat Cosmological)}
+\label{sec:m-frw}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -dt^2 + a(t)^2\!\left[dr^2 + r^2\,d\theta^2
+          + r^2\sin^2\!\theta\,d\varphi^2\right]
+\]
+
+\begin{lstlisting}
+a_t = Function('a', positive=True)(t)
+g_metric = Matrix([
+    [-1,          0,            0,                     0              ],
+    [ 0,  a_t**2,               0,                     0              ],
+    [ 0,       0,    a_t**2*r**2,                     0              ],
+    [ 0,       0,              0,   a_t**2*r**2*sin(theta)**2        ],
+])
+METRIC_NAME        = "FRW (flat)"
+METRIC_DESCRIPTION = "Flat FLRW cosmological metric with scale factor a(t)"
+\end{lstlisting}
+
+\textbf{Expected results:}
+\begin{itemize}
+  \item Weyl tensor: $C_{\rho\sigma\mu\nu} = 0$ (conformally flat)
+  \item Ricci scalar: proportional to $\ddot{a}/a$ and $(\dot{a}/a)^2$
+  \item Killing coordinates: $r$, $\theta$, $\varphi$ (spatial isotropy)
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\subsection{General Static Spherically Symmetric}
+\label{sec:m-gensph}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -e^{2A(r)}\,dt^2 + e^{2B(r)}\,dr^2
+         + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+A_r = Function('A')(r)
+B_r = Function('B')(r)
+g_metric = Matrix([
+    [-exp(2*A_r),         0,      0,                0              ],
+    [          0, exp(2*B_r),     0,                0              ],
+    [          0,          0,  r**2,                0              ],
+    [          0,          0,     0,  r**2*sin(theta)**2           ],
+])
+METRIC_NAME        = "General static spherical"
+METRIC_DESCRIPTION = "Static spherically symmetric metric with A(r), B(r)"
+\end{lstlisting}
+
+The Schwarzschild and Reissner-Nordström metrics are special cases.
+Results are expressed in terms of $A'(r)$, $A''(r)$, $B'(r)$.
+
+\begin{notebox}
+  Computing Kretschmann for this metric is very expensive due to the
+  symbolic function derivatives.  Set \code{FAST\_MODE = True} for a
+  first run.
+\end{notebox}
+
+% ------------------------------------------------------------------------------
+\subsection{PG-Type Warp Metric (Areal Gauge)}
+\label{sec:m-pg-areal}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -(1 - B^2\beta^2)\,dt^2
+         + 2B^2\beta\,dt\,dr
+         + B^2\,dr^2 + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+B_func    = Function('B',    positive=True)(r)
+beta_func = Function('beta')(r)
+g_metric = Matrix([
+    [-(1 - B_func**2 * beta_func**2),  B_func**2 * beta_func, 0, 0],
+    [ B_func**2 * beta_func,           B_func**2,             0, 0],
+    [ 0, 0, r**2,  0],
+    [ 0, 0, 0,     r**2 * sin(theta)**2],
+])
+METRIC_NAME        = "PG-type warp metric (areal gauge)"
+METRIC_DESCRIPTION = "Painleve-Gullstrand-type metric"
+\end{lstlisting}
+
+This is a Painlevé-Gullstrand (PG) form: lapse $N=1$, radial shift
+$\beta(r)$, spatial metric uses the areal radius.  Used in warp-drive and
+analogue gravity analyses.
+
+% ------------------------------------------------------------------------------
+\subsection{PG-Type Warp Metric (Spatial Conformal) — Default}
+\label{sec:m-pg-conf}
+% ------------------------------------------------------------------------------
+
+\[
+  ds^2 = -(1 - B^2\beta^2)\,dt^2
+         + 2B^2\beta\,dt\,dr
+         + B^2\,dr^2 + B^2 r^2\,d\theta^2 + B^2 r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+B_func    = Function('B',    positive=True)(r)
+beta_func = Function('beta')(r)
+g_metric = Matrix([
+    [-(1 - B_func**2 * beta_func**2),  B_func**2 * beta_func,             0, 0],
+    [ B_func**2 * beta_func,           B_func**2,                         0, 0],
+    [ 0,                               0,         B_func**2 * r**2,       0],
+    [ 0,                               0,                          0,
+                                           B_func**2 * r**2 * sin(theta)**2],
+])
+METRIC_NAME        = "PG-type warp metric (Spatial Conformal)"
+\end{lstlisting}
+
+This is the \textbf{default active metric} in the unmodified
+\code{gr\_main.py}.  It includes a conformal factor $B^2$ on the spatial
+metric, commonly used in warp-metric analyses where $B(r)$ represents a
+radial distortion.
+
+% ==============================================================================
+\section{Custom Metrics}
+\label{sec:custom}
+% ==============================================================================
+
+To add a metric not in the pre-defined list:
+
+\begin{enumerate}
+  \item \textbf{Define coordinate symbols} (Section~1.1).
+  \item \textbf{Define parameters} (Section~1.2).
+  \item \textbf{Construct the matrix} (Section~1.3).
+  \item \textbf{Set names} (\code{METRIC\_NAME}, \code{METRIC\_DESCRIPTION}).
+  \item Optionally supply \code{g\_inv\_metric} or \code{e\_tetrad}.
+\end{enumerate}
+
+\subsection*{Example: Reissner-Nordström (Charged Black Hole)}
+
+\[
+  ds^2 = -\!\left(1 - \frac{2M}{r} + \frac{Q^2}{r^2}\right)dt^2
+         + \left(1 - \frac{2M}{r} + \frac{Q^2}{r^2}\right)^{\!-1}dr^2
+         + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+M, Q = symbols('M Q', positive=True)
+f_rn = 1 - 2*M/r + Q**2/r**2
+g_metric = Matrix([
+    [-f_rn,     0,    0,                   0              ],
+    [    0, 1/f_rn,   0,                   0              ],
+    [    0,     0,  r**2,                  0              ],
+    [    0,     0,    0,  r**2 * sin(theta)**2             ],
+])
+METRIC_NAME        = "Reissner-Nordstrom"
+METRIC_DESCRIPTION = "Exterior electrovacuum solution, charge Q, mass M"
+\end{lstlisting}
+
+\subsection*{Example: de Sitter (Cosmological Constant)}
+
+\[
+  ds^2 = -\!\left(1 - \frac{\Lambda r^2}{3}\right)dt^2
+         + \left(1 - \frac{\Lambda r^2}{3}\right)^{\!-1}dr^2
+         + r^2\,d\theta^2 + r^2\sin^2\!\theta\,d\varphi^2
+\]
+
+\begin{lstlisting}
+Lambda = symbols('Lambda', positive=True)
+f_ds = 1 - Lambda * r**2 / 3
+g_metric = Matrix([
+    [-f_ds,     0,    0,                   0              ],
+    [    0, 1/f_ds,   0,                   0              ],
+    [    0,     0,  r**2,                  0              ],
+    [    0,     0,    0,  r**2 * sin(theta)**2             ],
+])
+METRIC_NAME = "de Sitter"
+\end{lstlisting}
+
+\subsection*{Tips for Custom Metrics}
+
+\begin{itemize}
+  \item Use \code{positive=True} assumptions on radial coordinates and
+        scale factors to avoid spurious absolute values in output.
+  \item For diagonal metrics, supply \code{g\_inv\_metric} manually to
+        skip the (slow) generic matrix inversion.
+  \item Apply \code{cancel()} inside the metric entries when components
+        involve complex fractions.  This pre-simplifies the starting point
+        for Christoffel computation.
+  \item Start with \code{FAST\_MODE = True} to verify the basic curvature
+        structure before running the full computation.
+\end{itemize}
+
+% ==============================================================================
+\section{Understanding the PDF Report}
+\label{sec:report}
+% ==============================================================================
+
+The generated PDF is organised into the following sections.
+
+\begin{center}
+\begin{longtable}{lll}
+  \toprule
+  \# & Section title & What it contains \\
+  \midrule\endhead
+  1 & Abstract
+    & Metric name, description, dimension, coordinates \\
+  2 & Metric Tensor and Conventions
+    & $g_{\mu\nu}$, $g^{\mu\nu}$, $\det g$, index conventions \\
+  3 & Christoffel Symbols
+    & Non-zero $\Gamma^\lambda{}_{\mu\nu}$ (zero components omitted) \\
+  4 & Riemann Curvature Tensor
+    & Non-zero $R^\rho{}_{\sigma\mu\nu}$ \\
+  5 & Ricci Tensor
+    & Full matrix $R_{\mu\nu}$ \\
+  6 & Ricci Scalar
+    & Expression for $R$ \\
+  7 & Einstein Tensor
+    & Full matrix $G_{\mu\nu}$ \\
+  8 & Curvature Invariants
+    & Kretschmann $K$ (if enabled), Weyl components (if enabled) \\
+  9 & Orthonormal Frame
+    & Tetrad $e^\mu{}_a$, detection method, orthonormality verification \\
+  10 & Energy Conditions
+    & $\rho$, pressures $p_i$, NEC, WEC, SEC expressions \\
+  11 & Geodesic Equations
+    & $\ddot{x}^\mu = -\Gamma^\mu{}_{\alpha\beta}\dot{x}^\alpha\dot{x}^\beta$ \\
+  12 & Conservation \& Consistency
+    & Bianchi $\nabla_\mu G^{\mu\nu}$, trace check \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\subsection*{Interpreting the Bianchi and Trace Checks}
+
+Section~12 prints expressions that should all equal zero for a
+self-consistent computation:
+
+\begin{itemize}
+  \item \textbf{Bianchi identity:} $\nabla_\mu G^{\mu\nu} = 0$ is printed
+        for each $\nu$.  The calculator applies \code{cancel()} and then
+        (if needed) \code{simplify()}.  A result of \code{0} confirms the
+        computation is self-consistent.
+  \item \textbf{Trace check:} Verifies $G^\mu{}_\mu = -R$ (for the mostly-plus
+        convention).
+\end{itemize}
+
+\begin{notebox}
+  A non-zero Bianchi result for metrics with abstract functions (e.g.\
+  $f(r)$) does not always indicate an error — SymPy may be unable to fully
+  simplify the expression symbolically.  Substitute numerical values for the
+  functions and their derivatives to verify numerically.
+\end{notebox}
+
+% ==============================================================================
+\section{Running the Calculator}
+\label{sec:running}
+% ==============================================================================
+
+\subsection{Recommended: \code{gr\_calculator.py}}
+
+\begin{lstlisting}[language=bash,numbers=none]
+cd GR_python
+python gr_calculator.py
+\end{lstlisting}
+
+\code{gr\_calculator.py} is a thin dispatcher that calls
+\code{gr\_main.main()}.  It adds the project directory to the Python path
+automatically, so it works regardless of the working directory.
+
+\subsection{Direct Execution}
+
+\begin{lstlisting}[language=bash,numbers=none]
+python gr_main.py
+\end{lstlisting}
+
+Equivalent to the above.
+
+\subsection{Calling \code{run\_computations()} Programmatically}
+
+You can import and call the pipeline directly from your own script:
+
+\begin{lstlisting}
+import sys
+sys.path.insert(0, '/path/to/GR_python')
+from gr_main import run_computations
+from gr_tensors import symbols, Function, Matrix, sin
+
+t, r, theta, phi = symbols('t r theta phi', real=True)
+M = symbols('M', positive=True)
+f = 1 - 2*M/r
+g = Matrix([[-f,0,0,0],[0,1/f,0,0],[0,0,r**2,0],
+            [0,0,0,r**2*sin(theta)**2]])
+
+results = run_computations(
+    g_metric                 = g,
+    coords                   = [t, r, theta, phi],
+    dim                      = 4,
+    g_inv_metric             = None,
+    e_tetrad                 = None,
+    compute_weyl_flag        = True,
+    compute_kretschmann_flag = True,
+    compute_geodesics_flag   = True,
+    compute_killing_flag     = True,
+    compute_tetrad_flag      = True,
+    fast_mode                = False,
+)
+
+print("Ricci scalar:", results['R_scalar'])
+print("Kretschmann:", results['K'])
+\end{lstlisting}
+
+\subsubsection*{\code{run\_computations()} Return Dictionary}
+
+\begin{center}
+\begin{longtable}{lll}
+  \toprule
+  Key & Type & Contents \\
+  \midrule\endhead
+  \code{'g'} & Matrix & Covariant metric $g_{\mu\nu}$ \\
+  \code{'ginv'} & Matrix & Contravariant metric $g^{\mu\nu}$ \\
+  \code{'det\_g'} & expr & Determinant $\det g$ \\
+  \code{'Gamma'} & list[list[list]] & Christoffel $\Gamma^\lambda{}_{\mu\nu}$ \\
+  \code{'R\_riem'} & list$^4$ & Riemann $R^\rho{}_{\sigma\mu\nu}$ \\
+  \code{'Ric'} & Matrix & Ricci tensor $R_{\mu\nu}$ \\
+  \code{'R\_scalar'} & expr & Ricci scalar $R$ \\
+  \code{'G'} & Matrix & Einstein tensor $G_{\mu\nu}$ \\
+  \code{'K'} & expr / \code{None} & Kretschmann scalar $K$ \\
+  \code{'Weyl'} & list$^4$ / \code{None} & Weyl tensor $C_{\rho\sigma\mu\nu}$ \\
+  \code{'e\_tetrad\_computed'} & Matrix / \code{None} & Computed tetrad \\
+  \code{'e\_cov'} & Matrix / \code{None} & Coframe \\
+  \code{'tetrad\_method'} & str & \code{'diagonal'}, \code{'adm\_shift\_...'},
+                                   \code{'user\_supplied'} \\
+  \code{'tetrad\_verified'} & bool & Orthonormality passed? \\
+  \code{'tetrad\_residual'} & Matrix & $g_{\mu\nu}e^\mu{}_a e^\nu{}_b - \eta_{ab}$ \\
+  \code{'G\_ortho'} & Matrix / \code{None} & $\hat{G}_{ab}$ in orthonormal frame \\
+  \code{'energy\_conditions'} & dict / \code{None} & $\rho$, $p_i$, NEC, WEC, SEC \\
+  \code{'geodesics'} & list / \code{None} & Geodesic equations \\
+  \code{'killing'} & list & Cyclic coordinate indices \\
+  \code{'bianchi'} & list & $\nabla_\mu G^{\mu\nu}$ (one entry per $\nu$) \\
+  \code{'trace\_check'} & expr & $G^\mu{}_\mu + R$ (should be $0$) \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\subsection{Calling \code{assemble\_report()} and \code{write\_and\_compile\_pdf()}}
+
+For custom pipelines you can call the report functions separately:
+
+\begin{lstlisting}
+from gr_latex import assemble_report
+from gr_main  import write_and_compile_pdf
+
+report_lines = assemble_report(
+    results         = results,
+    coords          = [t, r, theta, phi],
+    dim             = 4,
+    metric_name     = "Schwarzschild",
+    description     = "Exterior vacuum",
+    author          = "My Name",
+    latex_subs_dict = {},
+    g_metric_orig   = g,
+    e_tetrad        = None,
+)
+
+write_and_compile_pdf(report_lines, "/path/to/output/my_report")
+# Produces: my_report.tex  and  my_report.pdf
+\end{lstlisting}
+
+% ==============================================================================
+\section{Google Colab Edition}
+\label{sec:colab}
+% ==============================================================================
+
+\subsection{Differences from the Desktop Edition}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  File & Desktop & Colab \\
+  \midrule
+  \code{gr\_latex.py} & unchanged & identical copy \\
+  \code{gr\_tensors.py} & core version & + parallel helpers \\
+  \code{gr\_main.py} & original & + COLAB\_MODE, parallel, GPU flags \\
+  \code{gr\_numerics.py} & absent & new module \\
+  \code{GR\_Colab.ipynb} & absent & 8-cell notebook \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Notebook Workflow (8 Cells)}
+
+\begin{center}
+\begin{longtable}{lll}
+  \toprule
+  Cell & Title & Action \\
+  \midrule\endhead
+  1 & Install dependencies
+    & LaTeX, sympy, scipy; optional GPU packages \\
+  2 & Upload \& import modules
+    & Upload \code{.py} files, detect backend \\
+  3 & User input (\textbf{edit this})
+    & Set metric, coordinates, all flags \\
+  4 & Symbolic computation
+    & Call \code{grm.run\_computations()} \\
+  5 & Generate PDF
+    & Assemble report, call \code{write\_and\_compile\_pdf()} \\
+  6 & Numerical evaluation
+    & \code{grn.evaluate\_results\_numerical()} \\
+  7 & Visualisation
+    & \code{grn.plot\_gr\_quantities()} \\
+  8 & Geodesic integration
+    & \code{grn.integrate\_geodesic\_jax()} \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\subsection{Colab-Specific Flags}
+
+These three flags appear only in the Colab edition of \code{gr\_main.py}:
+
+\begin{lstlisting}
+USE_PARALLEL    = False   # parallel Christoffel + Riemann
+N_PARALLEL_JOBS = 2       # worker count (Colab free tier: 2 cores)
+USE_GPU         = False   # CuPy/JAX for numerical post-processing
+\end{lstlisting}
+
+\subsubsection{\code{USE\_PARALLEL} and \code{N\_PARALLEL\_JOBS}}
+
+Distributes the Christoffel and Riemann computations across multiple CPU
+cores using Python's \code{ProcessPoolExecutor}.
+
+\begin{warnbox}[Platform restriction]
+  \textbf{Linux / macOS only.}  Do \emph{not} set \code{USE\_PARALLEL = True}
+  on Windows.  Windows uses the \code{'spawn'} process start method, which
+  cannot serialise SymPy expression objects across process boundaries,
+  causing a \code{PicklingError}.
+\end{warnbox}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Setting & Effect \\
+  \midrule
+  \code{USE\_PARALLEL = False} & Sequential (default; safe on all platforms) \\
+  \code{USE\_PARALLEL = True} & Parallel; uses \code{N\_PARALLEL\_JOBS} workers \\
+  \code{N\_PARALLEL\_JOBS = 2} & Google Colab free tier (2 CPU cores) \\
+  \code{N\_PARALLEL\_JOBS = 4} & Google Colab Pro / standard Linux \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{\code{USE\_GPU}}
+
+Tells \code{gr\_numerics} to use CuPy or JAX when evaluating symbolic
+expressions numerically (cells 6--8).  The symbolic computation in cell~4
+always runs on CPU regardless.
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Backend & Install & When used \\
+  \midrule
+  CuPy (CUDA) & \code{pip install cupy-cuda12x} & GPU runtime selected in Colab \\
+  JAX (XLA)  & \code{pip install "jax[cuda12]"} & If CuPy not available \\
+  NumPy (CPU) & already installed & Fallback if no GPU \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{\code{gr\_numerics.py} — API Reference}
+
+\subsubsection{Backend Detection}
+
+\begin{lstlisting}
+grn.detect_backend()    # returns 'cupy', 'jax', or 'numpy'
+grn.get_backend(name)   # returns the array module
+\end{lstlisting}
+
+\subsubsection{Lambdification}
+
+Convert SymPy expressions to fast numerical functions:
+
+\begin{lstlisting}
+fn = grn.lambdify_scalar(results['R_scalar'], coords, backend='numpy')
+# fn(t_val, r_val, theta_val, phi_val) -> float or array
+
+fns = grn.lambdify_matrix(results['Ric'], coords, backend='numpy')
+# fns[i][j](t_val, r_val, ...) -> float or array
+\end{lstlisting}
+
+\subsubsection{Grid Evaluation}
+
+\begin{lstlisting}
+import numpy as np
+
+coord_ranges = {
+    t:     (0.0, 10.0),
+    r:     (2.5, 20.0),
+    theta: (0.1, 3.0),
+    phi:   (0.0, 6.28),
+}
+
+num_results = grn.evaluate_results_numerical(
+    results, coords, coord_ranges, npts=40
+)
+# Returns dict: {'R_scalar': array, 'K': array}
+\end{lstlisting}
+
+Parameters:
+\begin{description}[leftmargin=3cm,style=nextline]
+  \item[\code{coord\_ranges}]
+    Dict mapping each symbol to a \code{(min, max)} tuple.
+    Coordinates absent from the dict default to \code{(0, 1)}.
+  \item[\code{npts}]
+    Grid points per axis.  Memory usage scales as \code{npts\textasciicircum dim},
+    so keep this low for 4D metrics (\code{npts=20}--\code{40}).
+\end{description}
+
+\subsubsection{Visualisation}
+
+\begin{lstlisting}
+# Plot R_scalar and K as 2D heat maps in the (r, theta) plane:
+grn.plot_gr_quantities(num_results, coords, slice_axes=(1, 2))
+\end{lstlisting}
+
+\code{slice\_axes=(i, j)} selects which two coordinate axes form the x- and
+y-axes of the plot.  Central slices are taken along all remaining axes.
+
+\subsubsection{Geodesic Integration}
+
+\begin{lstlisting}
+import numpy as np
+
+def rhs(tau, y):
+    """
+    RHS of first-order geodesic ODE.
+    y = [x0, x1, x2, x3, v0, v1, v2, v3]
+    Returns dy/dtau.
+    """
+    positions  = y[:4]
+    velocities = y[4:]
+    # Replace zeros with lambdified Christoffel terms:
+    accelerations = [0.0, 0.0, 0.0, 0.0]
+    return list(velocities) + accelerations
+
+y0 = [0.0, 6.0, np.pi/2, 0.0,   # initial position
+      1.0, 0.0, 0.0, 0.1]        # initial velocity
+
+tau_arr, y_arr = grn.integrate_geodesic_jax(
+    rhs_fn   = rhs,
+    y0       = y0,
+    tau_span = (0.0, 50.0),
+    n_steps  = 500,
+)
+
+grn.plot_geodesic(tau_arr, y_arr, coords)
+\end{lstlisting}
+
+The function tries \textbf{diffrax} (JAX-JIT) first; falls back to
+\textbf{scipy.integrate.odeint} if JAX or diffrax is not installed.
+
+\subsection{Geodesic Integration — Schwarzschild Example}
+
+For a Schwarzschild equatorial circular orbit at $r = 6M$ (with $M=1$):
+
+\begin{lstlisting}
+import numpy as np
+from sympy import lambdify
+
+M_val = 1.0
+r0    = 6.0
+f0    = 1.0 - 2.0 * M_val / r0
+Omega = np.sqrt(M_val / r0**3)
+
+# Build RHS by lambdifying Christoffel symbols
+Gamma = results['Gamma']
+coords_num = [t, r, theta, phi]
+
+# Lambdify all non-zero Christoffel components
+Gamma_fn = {}
+for lam in range(4):
+    for mu in range(4):
+        for nu in range(4):
+            expr = Gamma[lam][mu][nu]
+            if expr != 0:
+                Gamma_fn[(lam, mu, nu)] = lambdify(
+                    coords_num, expr.subs(M, M_val), 'numpy'
+                )
+
+def rhs_schwarz(tau, y):
+    x = y[:4]
+    v = y[4:]
+    accel = [0.0, 0.0, 0.0, 0.0]
+    for (lam, mu, nu), fn in Gamma_fn.items():
+        g_val = fn(*x)
+        accel[lam] -= float(g_val) * v[mu] * v[nu]
+    return list(v) + accel
+
+y0 = [0.0, r0, np.pi/2, 0.0,
+      1.0/f0, 0.0, 0.0, Omega/f0]
+
+tau_arr, y_arr = grn.integrate_geodesic_jax(rhs_schwarz, y0,
+                     tau_span=(0, 2*np.pi/Omega), n_steps=500)
+grn.plot_geodesic(tau_arr, y_arr, coords_num)
+\end{lstlisting}
+
+% ==============================================================================
+\section{Advanced Topics}
+\label{sec:advanced}
+% ==============================================================================
+
+\subsection{Tetrad Computation Details}
+\label{sec:adv-tetrad}
+
+When \code{COMPUTE\_TETRAD = True} and no tetrad is supplied, the calculator
+automatically constructs the orthonormal tetrad using one of three methods:
+
+\begin{description}[leftmargin=2.5cm,style=nextline]
+  \item[Case A: Diagonal metric]
+    All off-diagonal entries of $g_{\mu\nu}$ are zero.
+    Tetrad components: $e^\mu{}_a = \delta^\mu_a / \sqrt{|g_{\mu\mu}|}$.
+
+  \item[Case B: ADM metric, diagonal spatial block]
+    The metric has a non-zero shift vector (e.g.\ $g_{tr} \neq 0$) but the
+    spatial part $\gamma_{ij}$ ($i,j \in \{1,2,3\}$) is diagonal.
+    An analytic coframe formula is used.
+
+  \item[Case C: ADM metric, non-diagonal spatial block]
+    Most general case; requires Cholesky factorisation of $\gamma_{ij}$ to
+    extract the spatial triad.
+\end{description}
+
+If Cholesky fails (e.g.\ the spatial metric is not positive-definite), the
+calculator prints a warning.  In that case supply the tetrad manually.
+
+\textbf{Verification:} After computing $e^\mu{}_a$, the calculator checks
+$g_{\mu\nu}e^\mu{}_a e^\nu{}_b = \eta_{ab}$ and reports the residual matrix.
+A passed verification is printed as \code{TETRAD VERIFIED: OK}.
+
+\subsection{Energy Conditions}
+\label{sec:adv-ec}
+
+Energy conditions are extracted from the orthonormal-frame Einstein tensor
+$\hat{G}_{ab}$ via the Einstein field equations $G_{\mu\nu} = 8\pi T_{\mu\nu}$:
+
+\begin{align*}
+  \rho   &= \hat{G}_{00} / (8\pi) & &\text{(energy density)}\\
+  p_i    &= \hat{G}_{ii} / (8\pi) & &\text{(principal pressures)}
+\end{align*}
+
+The conditions reported (as symbolic expressions) are:
+
+\begin{center}
+\begin{tabular}{llll}
+  \toprule
+  Name & Abbreviation & Condition & Physical meaning \\
+  \midrule
+  Null Energy Condition & NEC & $\rho + p_i \geq 0$ & Non-negative null energy \\
+  Weak Energy Condition & WEC & $\rho \geq 0$ and NEC & Non-negative energy density \\
+  Strong Energy Condition & SEC & $\rho + \sum_i p_i \geq 0$ & Gravity is attractive \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{notebox}
+  The symbolic output gives \emph{expressions}, not verified inequalities.
+  To determine whether a condition holds, substitute numerical values for
+  the metric functions and parameters into the expressions.
+\end{notebox}
+
+\subsection{Killing Vectors and Conserved Quantities}
+\label{sec:adv-killing}
+
+A coordinate $x^\mu$ is \textbf{cyclic} if the metric is independent of it:
+\[
+  \frac{\partial g_{\alpha\beta}}{\partial x^\mu} = 0
+  \quad \forall\,\alpha,\beta.
+\]
+Each cyclic coordinate generates a Killing vector $\xi^\mu = \delta^\mu{}_a$
+and a corresponding conserved quantity along geodesics:
+\[
+  p_\mu = g_{\mu\nu}\frac{dx^\nu}{d\lambda} = \text{const}.
+\]
+
+Examples:
+\begin{itemize}
+  \item In Schwarzschild: $t$ cyclic $\Rightarrow$ conserved energy $E$;
+        $\varphi$ cyclic $\Rightarrow$ conserved angular momentum $L$.
+  \item In FRW: $r$, $\theta$, $\varphi$ cyclic $\Rightarrow$ spatial
+        isotropy (but momenta not conserved due to expansion).
+\end{itemize}
+
+\subsection{Weyl Tensor}
+\label{sec:adv-weyl}
+
+The Weyl tensor $C_{\rho\sigma\mu\nu}$ is the totally trace-free part of the
+Riemann tensor.  It vanishes if and only if the spacetime is
+\textbf{conformally flat}.
+
+\begin{itemize}
+  \item \textbf{Vacuum} ($R_{\mu\nu}=0$): $C_{\rho\sigma\mu\nu} = R_{\rho\sigma\mu\nu}$.
+  \item \textbf{FRW cosmology}: $C = 0$ (conformally flat).
+  \item \textbf{Schwarzschild}: $C \neq 0$ (tidal forces, $K = 48M^2/r^6$).
+\end{itemize}
+
+Physically, the Weyl tensor controls tidal deformation and gravitational
+wave propagation.  It is automatically skipped when \code{dim $\neq$ 4}.
+
+\subsection{Bianchi Identity Check}
+\label{sec:adv-bianchi}
+
+The \emph{contracted Bianchi identity} $\nabla_\mu G^{\mu\nu} = 0$ is
+computed for each $\nu = 0,\ldots,\text{dim}-1$:
+\[
+  \nabla_\mu G^{\mu\nu}
+  = \partial_\mu G^{\mu\nu}
+  + \Gamma^\mu{}_{\mu\lambda}G^{\lambda\nu}
+  + \Gamma^\nu{}_{\mu\lambda}G^{\mu\lambda}.
+\]
+The calculator applies \code{cancel()} and (if needed) \code{simplify()}.
+
+\textbf{Interpretation:}
+\begin{itemize}
+  \item \code{0} — self-consistent computation.
+  \item Non-zero \emph{symbolic} expression — SymPy could not simplify
+        fully.  Try evaluating numerically.
+  \item Non-zero \emph{number} — indicates a programming error (report
+        as a bug).
+\end{itemize}
+
+% ==============================================================================
+\section{Performance Guide}
+\label{sec:perf}
+% ==============================================================================
+
+\begin{center}
+\begin{longtable}{llll}
+  \toprule
+  Quantity & Computational cost & Typical time & Best practice \\
+  \midrule\endhead
+  Inverse metric & Low & $< 1$ s
+    & Supply manually for diagonal metrics \\
+  Christoffel $\Gamma^\lambda{}_{\mu\nu}$ & Medium & 5--30 s
+    & Parallel on Colab (\code{USE\_PARALLEL}) \\
+  Riemann $R^\rho{}_{\sigma\mu\nu}$ & High & 30 s--5 min
+    & Parallel on Colab \\
+  Ricci, Einstein & Medium & $< 1$ min
+    & Always computed \\
+  Kretschmann $K$ & Very high & 5--60 min
+    & Disable for first run \\
+  Weyl $C_{\rho\sigma\mu\nu}$ & High & 2--20 min
+    & Disable for first run \\
+  Geodesic equations & Low & $< 5$ s
+    & Negligible cost \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\subsection*{Recommendations}
+
+\begin{enumerate}
+  \item \textbf{First run:} set \code{FAST\_MODE = True}.
+  \item \textbf{Supply \code{g\_inv\_metric}} manually for diagonal metrics to
+        skip the symbolic matrix inversion.
+  \item \textbf{Use \code{positive=True}} on coordinate symbols and parameters
+        to enable SymPy simplifications.
+  \item \textbf{Parallel computation} (\code{USE\_PARALLEL = True}) on
+        Colab or Linux: typically 2--3$\times$ speedup for the Christoffel
+        and Riemann phases on a 4-core machine.
+  \item \textbf{Simple metrics} (Schwarzschild, Minkowski): full run including
+        Weyl/Kretschmann completes in 5--15 minutes.
+  \item \textbf{Abstract-function metrics} (e.g.\ $f(r)$, $B(r)$, $\beta(r)$):
+        expect hours for Kretschmann — consider disabling it.
+\end{enumerate}
+
+% ==============================================================================
+\section{Troubleshooting}
+\label{sec:trouble}
+% ==============================================================================
+
+\begin{center}
+\begin{longtable}{p{5cm}p{4cm}p{5.5cm}}
+  \toprule
+  Symptom & Cause & Fix \\
+  \midrule\endhead
+  \code{NameError: name '\_\_file\_\_' is not defined}
+    & Script imported inside a Jupyter notebook
+    & Use the Colab edition (\code{GR\_python\_colab/})  \\[4pt]
+  PDF not generated; pdflatex message
+    & \code{pdflatex} not in system \code{PATH}
+    & Install MiKTeX / TeX Live; or compile manually \\[4pt]
+  \code{PicklingError} or \code{AttributeError} with \code{USE\_PARALLEL}
+    & Windows spawn method cannot pickle SymPy
+    & Set \code{USE\_PARALLEL = False} on Windows \\[4pt]
+  Computation runs for hours
+    & Kretschmann / Weyl for abstract metrics
+    & Set \code{FAST\_MODE = True}; disable \code{COMPUTE\_KRETSCHMANN} \\[4pt]
+  Non-zero Bianchi result
+    & SymPy incomplete simplification
+    & Usually harmless; substitute numbers to verify \\[4pt]
+  Tetrad verification fails (\code{residual $\neq 0$})
+    & Wrong signature or non-Lorentzian metric
+    & Check \code{g\_metric} sign convention; supply tetrad manually \\[4pt]
+  Missing LaTeX packages in PDF compile
+    & Incomplete TeX distribution
+    & Install missing packages via MiKTeX package manager or
+      \code{tlmgr install <pkg>} \\[4pt]
+  \code{NameError: name 'progress' is not defined}
+    & Stale \code{.pyc} cache
+    & Delete \code{\_\_pycache\_\_/} and rerun \\[4pt]
+  Very large PDF / equation overflow
+    & Long symbolic expressions
+    & Normal for abstract-function metrics; expressions wrap automatically \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+% ==============================================================================
+\appendix
+% ==============================================================================
+
+\section{Complete Configuration Flag Reference}
+\label{app:flags}
+
+\begin{center}
+\begin{longtable}{p{3.6cm}p{1.8cm}p{2.2cm}p{6cm}}
+  \toprule
+  Variable & Type & Default & Purpose \\
+  \midrule\endhead
+  \code{coords} & list & \code{[t,r,$\theta$,$\varphi$]} & Coordinate symbols \\
+  \code{dim} & int & \code{4} & Spacetime dimension \\
+  \code{g\_metric} & Matrix & PG warp & Covariant metric $g_{\mu\nu}$ \\
+  \code{g\_inv\_metric} & Matrix/None & \code{None} & Contravariant metric; \code{None} = auto \\
+  \code{e\_tetrad} & Matrix/None & \code{None} & Orthonormal tetrad; \code{None} = auto \\
+  \code{latex\_subs} & dict & \code{\{\}} & LaTeX string post-replacements \\
+  \code{COMPUTE\_WEYL} & bool & \code{True} & Weyl tensor (4D only) \\
+  \code{COMPUTE\_KRETSCHMANN} & bool & \code{True} & Kretschmann scalar (slow) \\
+  \code{COMPUTE\_GEODESICS} & bool & \code{True} & Geodesic equations \\
+  \code{COMPUTE\_KILLING} & bool & \code{True} & Cyclic coordinate detection \\
+  \code{COMPUTE\_TETRAD} & bool & \code{True} & Auto-compute tetrad \\
+  \code{FAST\_MODE} & bool & \code{False} & Skip Weyl \& Kretschmann \\
+  \code{USE\_PARALLEL} & bool & \code{False} & Parallel (Linux/Colab only) \\
+  \code{N\_PARALLEL\_JOBS} & int & \code{4} & Parallel worker count \\
+  \code{USE\_GPU} & bool & \code{False} & GPU numerical post-proc.\ (Colab) \\
+  \code{OUTPUT\_FILENAME} & str & \code{"gr\_report"} & Base name for .tex/.pdf \\
+  \code{AUTHOR\_NAME} & str & \code{"SymPy GR Engine"} & PDF author field \\
+  \code{METRIC\_NAME} & str & (metric name) & PDF title \\
+  \code{METRIC\_DESCRIPTION} & str & (description) & PDF abstract text \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+% ==============================================================================
+\section{\code{run\_computations()} Parameter Reference}
+\label{app:runcomp}
+
+\begin{center}
+\begin{longtable}{p{4cm}p{2cm}p{1.5cm}p{6.5cm}}
+  \toprule
+  Parameter & Type & Default & Purpose \\
+  \midrule\endhead
+  \code{g\_metric} & Matrix & — & Covariant metric (required) \\
+  \code{coords} & list & — & Coordinate symbols (required) \\
+  \code{dim} & int & — & Spacetime dimension (required) \\
+  \code{g\_inv\_metric} & Matrix/None & \code{None} & Contravariant metric; \code{None}=auto \\
+  \code{e\_tetrad} & Matrix/None & \code{None} & User tetrad; \code{None}=auto \\
+  \code{compute\_weyl\_flag} & bool & \code{True} & Compute Weyl tensor \\
+  \code{compute\_kretschmann\_flag} & bool & \code{True} & Compute $K$ \\
+  \code{compute\_geodesics\_flag} & bool & \code{True} & Compute geodesics \\
+  \code{compute\_killing\_flag} & bool & \code{True} & Detect Killing coords \\
+  \code{compute\_tetrad\_flag} & bool & \code{True} & Auto-compute tetrad \\
+  \code{fast\_mode} & bool & \code{False} & Skip Weyl \& Kretschmann \\
+  \code{compute\_parallel} & bool & \code{False} & Parallel (Colab only) \\
+  \code{n\_jobs} & int & \code{4} & Parallel workers (Colab only) \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\section{\code{gr\_numerics.py} Quick Reference (Colab Edition)}
+\label{app:numerics}
+
+\begin{center}
+\begin{longtable}{p{5.5cm}p{8.5cm}}
+  \toprule
+  Function signature & Description \\
+  \midrule\endhead
+  \code{detect\_backend()} & Returns \code{'cupy'}, \code{'jax'}, or \code{'numpy'} \\[4pt]
+  \code{get\_backend(name=None)} & Returns the array module (\code{np}/\code{cp}/\code{jnp}) \\[4pt]
+  \code{lambdify\_scalar(expr, coords, backend)} & SymPy scalar $\to$ callable \\[4pt]
+  \code{lambdify\_matrix(mat, coords, backend)} & SymPy Matrix $\to$ list of callables \\[4pt]
+  \code{evaluate\_scalar\_grid(fn, coord\_vals)} & Evaluate on meshgrid of 1D arrays \\[4pt]
+  \code{evaluate\_results\_numerical(}\newline
+    \quad\code{results, coords, coord\_ranges, npts=50)}
+    & Lambdify \& grid-evaluate \code{'R\_scalar'} and \code{'K'} \\[4pt]
+  \code{plot\_gr\_quantities(}\newline
+    \quad\code{num\_results, coords, slice\_axes=(0,1))}
+    & 2D heat maps via matplotlib \\[4pt]
+  \code{integrate\_geodesic\_jax(}\newline
+    \quad\code{rhs\_fn, y0, tau\_span, n\_steps)}
+    & diffrax/JAX or scipy ODE integration \\[4pt]
+  \code{plot\_geodesic(tau\_arr, y\_arr, coords)} & Position vs.\ $\tau$ subplots \\
+  \bottomrule
+\end{longtable}
+\end{center}
+
+\section{Coordinate LaTeX Map}
+\label{app:coordmap}
+
+\begin{center}
+\begin{tabular}{lll}
+  \toprule
+  Symbol name & LaTeX output & Rendered \\
+  \midrule
+  \code{t}     & \code{t}          & $t$ \\
+  \code{r}     & \code{r}          & $r$ \\
+  \code{theta} & \code{\textbackslash theta}   & $\theta$ \\
+  \code{phi}   & \code{\textbackslash varphi}  & $\varphi$ \\
+  \code{x}     & \code{x}          & $x$ \\
+  \code{y}     & \code{y}          & $y$ \\
+  \code{z}     & \code{z}          & $z$ \\
+  \code{chi}   & \code{\textbackslash chi}     & $\chi$ \\
+  \code{psi}   & \code{\textbackslash psi}     & $\psi$ \\
+  (any other)  & \code{str(symbol)} & as-is \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+These mappings are defined in \code{gr\_tensors.\_COORD\_LATEX\_MAP} and are
+used throughout the PDF report for axis labels and index notation.
+
+\end{document}

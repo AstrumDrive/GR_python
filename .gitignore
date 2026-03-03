@@ -9,3 +9,7 @@ __pycache__/
 nul
 .DS_Store
 *.code-workspace
+
+# Generated calculator outputs (re-created by running gr_calculator.py)
+gr_report.tex
+gr_report.pdf
