@@ -1,6 +1,7 @@
 {
   "title": "GR_python: Symbolic General Relativity Calculator and Report Generator",
   "upload_type": "software",
+  "license": "BSD-3-Clause",
   "description": "Symbolic General Relativity calculator and report generator powered by SymPy and LaTeX. The repository supports local script-based execution, Spyder/local IDE workflows, Linux/cloud execution, and a Google Colab notebook workflow.",
   "creators": [
     {

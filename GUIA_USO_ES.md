@@ -130,3 +130,15 @@ La asistencia de IA queda mencionada como nota de desarrollo, no como autor form
    ```python
    METRIC_KEY = 'tu_nueva_metrica'
    ```
+
+
+## Licencia y citacion
+
+Este proyecto se distribuye bajo la licencia [BSD 3-Clause](C:/Users/Nelson/Downloads/GR_python/LICENSE).
+
+Si usas este software en investigacion, publicaciones o trabajo cientifico derivado,
+por favor cita el proyecto usando:
+
+- [CITATION.cff](C:/Users/Nelson/Downloads/GR_python/CITATION.cff)
+- el DOI de Zenodo asociado a la release de GitHub
+

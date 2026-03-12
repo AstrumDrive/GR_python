@@ -131,6 +131,17 @@ Current creator metadata is set to Nelson Bolivar, affiliated with Astrum Drive 
 
 Note: AI assistance is mentioned in metadata notes and documentation, but not listed as a formal software author.
 
+
+## License and Citation
+
+This project is released under the [BSD 3-Clause License](C:/Users/Nelson/Downloads/GR_python/LICENSE).
+
+If you use this software in research, publications, or derivative scientific work,
+please cite the project using:
+
+- [CITATION.cff](C:/Users/Nelson/Downloads/GR_python/CITATION.cff)
+- the Zenodo DOI associated with the GitHub release
+
 ## Project Structure
 
 - [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py): entry point

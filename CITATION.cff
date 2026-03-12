@@ -7,6 +7,7 @@ abstract: >-
   notebook workflow for computing curvature tensors, invariants, orthonormal-frame
   quantities, energy conditions, geodesics, and report outputs from user-defined metrics.
 type: software
+license: "BSD-3-Clause"
 authors:
   - family-names: "Bolivar"
     given-names: "Nelson"
