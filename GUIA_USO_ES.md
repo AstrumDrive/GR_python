@@ -5,6 +5,14 @@ Esta guia resume como usar el proyecto en los dos escenarios principales:
 - uso local en Spyder o un IDE parecido
 - uso en Google Colab
 
+## Elegir el entorno
+
+| Donde lo vas a correr | Archivo principal | Que hacer |
+|---|---|---|
+| Google Colab | [GR_python_colab/GR_Colab.ipynb](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/GR_Colab.ipynb) | Ejecutar las celdas en orden |
+| Spyder o Python local | [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) | Elegir `METRIC_KEY` y correr [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py) |
+| Google Cloud o Linux remoto | [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) | Instalar dependencias y correr [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py) |
+
 ## 1. Uso local paso a paso
 
 ### Preparacion inicial

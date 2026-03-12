@@ -4,6 +4,16 @@ Symbolic General Relativity analysis powered by SymPy, with optional GPU numeric
 
 Spanish quick guide: [GUIA_USO_ES.md](C:/Users/Nelson/Downloads/GR_python/GUIA_USO_ES.md)
 
+## Repo Intent
+
+This repository is meant to be used in two natural ways:
+
+- as a notebook workflow in Colab
+- as a script workflow in Spyder, local Python, or a cloud VM
+
+If you are in Colab, start from `GR_Colab.ipynb`.
+If you are local or in Google Cloud, start from `gr_main.py` / `gr_calculator.py` in the project root.
+
 ## Files
 
 | File | Purpose |

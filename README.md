@@ -4,6 +4,14 @@ A symbolic General Relativity calculator and report generator powered by SymPy a
 
 Spanish quick guide: [GUIA_USO_ES.md](C:/Users/Nelson/Downloads/GR_python/GUIA_USO_ES.md)
 
+## Choose Your Environment
+
+| Where you run it | Open this | What to do |
+|---|---|---|
+| Google Colab | [GR_python_colab/GR_Colab.ipynb](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/GR_Colab.ipynb) | Run the notebook cells in order |
+| Spyder / local Python | [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) | Set `METRIC_KEY` and run [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py) |
+| Google Cloud / Linux VM | [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) | Install dependencies, then run [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py) |
+
 ## What It Does
 
 Starting from a metric, the project computes:
