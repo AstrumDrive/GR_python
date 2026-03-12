@@ -2,6 +2,8 @@
 
 A symbolic General Relativity calculator and report generator powered by SymPy and LaTeX.
 
+Spanish quick guide: [GUIA_USO_ES.md](C:/Users/Nelson/Downloads/GR_python/GUIA_USO_ES.md)
+
 ## What It Does
 
 Starting from a metric, the project computes:

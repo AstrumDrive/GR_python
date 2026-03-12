@@ -2,6 +2,8 @@
 
 Symbolic General Relativity analysis powered by SymPy, with optional GPU numerical post-processing.
 
+Spanish quick guide: [GUIA_USO_ES.md](C:/Users/Nelson/Downloads/GR_python/GUIA_USO_ES.md)
+
 ## Files
 
 | File | Purpose |
