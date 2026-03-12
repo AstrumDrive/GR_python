@@ -14,19 +14,27 @@ Symbolic General Relativity analysis powered by SymPy, with optional GPU numeric
 | `gr_numerics.py` | Numerical evaluation and plotting |
 | `gr_warp.py` | Warp-document helpers and comparisons |
 
-## Quick Start
+## Colab Use Step by Step
 
-1. Open `GR_Colab.ipynb` in Colab.
-2. Run Cell 1.
-3. Run Cell 2.
-4. Edit Cell 3.
-5. Run Cell 4 and Cell 5.
+1. Open `GR_Colab.ipynb` in Google Colab.
+2. Run **Cell 1** to install LaTeX and Python dependencies.
+3. Run **Cell 2** to clone the GitHub branch and import the modules.
+4. Edit **Cell 3**.
+5. Run **Cell 4** for the symbolic calculation.
+6. Run **Cell 5** to generate the report files.
+7. If you want numerics and plots, continue with **Cell 6**, **Cell 7**, and **Cell 8**.
 
-## Cell 3 Workflow
+## What Each Important Cell Does
 
-Cell 3 is designed to keep metric selection simple.
+- **Cell 1** installs packages
+- **Cell 2** loads the project from GitHub
+- **Cell 3** is where you choose the metric/profile/report options
+- **Cell 4** runs the symbolic GR computation
+- **Cell 5** writes `gr_report.pdf` and, if enabled, `gr_comparison_report.pdf`
 
-For the warp-document workflow, the main switches are:
+## Standard Warp-Document Workflow
+
+In **Cell 3**, the usual configuration is:
 
 ```python
 VARIANT = 'variant_a'
@@ -40,19 +48,23 @@ This means:
 - `gr_report.pdf` is the direct output of the symbolic run
 - `gr_comparison_report.pdf` is optional and only used for checks against external formulas
 
-## Adding a New Metric Outside the Warp Workflow
+## If You Want a Brand-New Metric
 
-If you want to work with a brand-new metric beyond the predefined warp variants, use the local driver [gr_main.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_main.py) with the same pattern as the desktop version:
+For a completely new metric outside the predefined warp variants, use the local driver [gr_main.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_main.py) with the same workflow as the desktop version:
 
 1. set `METRIC_KEY = 'custom'`
 2. define any extra symbols/functions in Section 1.2
 3. fill `CUSTOM_METRIC_CONFIG`
+4. run the script locally, or adapt the same metric definition into a notebook cell
 
-Two commented examples are included directly in [gr_main.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_main.py): one diagonal ansatz and one metric with a `dt dr` cross-term.
+Two commented examples are already included in [gr_main.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_main.py):
 
-Reusable built-in metrics are stored in [gr_metric_library.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_metric_library.py). Useful examples now include Schwarzschild, Reissner-Nordstrom, static de Sitter, and a Morris-Thorne wormhole template.
+- a diagonal ansatz
+- a metric with a `dt dr` cross-term
 
-## Parallel and GPU Notes
+Reusable built-in metrics are stored in [gr_metric_library.py](C:/Users/Nelson/Downloads/GR_python/GR_python_colab/gr_metric_library.py). Useful examples include Schwarzschild, Reissner-Nordstrom, static de Sitter, and a Morris-Thorne wormhole template.
+
+## GPU and Parallel Notes
 
 - Symbolic SymPy calculations run on CPU.
 - GPU support accelerates only numerical post-processing.

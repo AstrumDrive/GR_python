@@ -2,11 +2,9 @@
 
 A symbolic General Relativity calculator and report generator powered by SymPy and LaTeX.
 
-## About
+## What It Does
 
-This project automates the standard symbolic pipeline in General Relativity so you can move directly from a metric ansatz to geometric and physical quantities without hand-deriving the tensor algebra.
-
-It computes:
+Starting from a metric, the project computes:
 
 - Christoffel symbols
 - Riemann curvature tensor
@@ -25,20 +23,44 @@ It also generates a LaTeX report and, when `pdflatex` is available, a PDF report
 
 - Python 3.x
 - `sympy`
-- a LaTeX distribution with `pdflatex` in PATH
+- a LaTeX distribution with `pdflatex` in PATH if you want PDF generation
 
-## Quick Start
+## Local Use Step by Step (Spyder or similar)
+
+### First-time setup
+
+1. Open the folder in Spyder or your preferred Python IDE.
+2. Make sure `sympy` is installed in the same Python environment used by Spyder.
+3. If you want the PDF directly, install a LaTeX distribution such as MiKTeX and ensure `pdflatex` is in PATH.
+
+### Run a built-in metric
 
 1. Open [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py).
-2. In **Section 1**, choose a metric with one line:
+2. In Section 1, leave the coordinates as they are unless you really want a different chart.
+3. Choose a built-in metric with one line, for example:
    ```python
    METRIC_KEY = 'schwarzschild'
    ```
-3. Run:
-   ```bash
-   python gr_calculator.py
+4. Run [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py) or run [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) directly.
+5. Check the generated files in the project folder:
+   - `gr_report.tex`
+   - `gr_report.pdf` if `pdflatex` is available
+
+### Run a custom metric
+
+1. Open [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py).
+2. Set:
+   ```python
+   METRIC_KEY = 'custom'
    ```
-4. Inspect `gr_report.tex` and `gr_report.pdf`.
+3. In Section 1.2, define any extra parameters or symbolic functions your metric needs.
+4. Fill `CUSTOM_METRIC_CONFIG`.
+5. Run the script.
+
+Two ready-to-adapt examples are already included inside [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py):
+
+- a diagonal custom metric with a radial function `alpha(r)`
+- a metric with a `dt dr` cross-term controlled by `beta(r)`
 
 ## Built-in Metrics
 
@@ -56,33 +78,7 @@ The built-in metric registry currently includes:
 
 These are defined in [gr_metric_library.py](C:/Users/Nelson/Downloads/GR_python/gr_metric_library.py).
 
-## Adding a One-Off Custom Metric
-
-You no longer need to comment and uncomment large metric blocks.
-
-1. In [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py), set:
-   ```python
-   METRIC_KEY = 'custom'
-   ```
-2. Define any extra parameters or SymPy functions your line element needs in Section 1.2. Typical examples are `Q`, `Lambda`, `Phi(r)`, `b(r)`, or `a(t)`.
-3. Fill the `CUSTOM_METRIC_CONFIG` template:
-   ```python
-   CUSTOM_METRIC_CONFIG = {
-       'g_metric': Matrix([...]),
-       'metric_name': 'My Custom Metric',
-       'metric_description': 'Short description',
-       'g_inv_metric': None,
-       'e_tetrad': None,
-   }
-   ```
-4. Leave `g_inv_metric` or `e_tetrad` as `None` unless you want to provide them manually.
-
-Two ready-to-adapt patterns are now included directly in [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py):
-
-- a diagonal custom metric with a radial function `alpha(r)`
-- a metric with a `dt dr` cross-term controlled by `beta(r)`
-
-## Registering a New Built-in Metric
+## Add a New Built-in Metric
 
 If you want a metric to become a reusable named option:
 
@@ -94,17 +90,17 @@ If you want a metric to become a reusable named option:
    - `metric_description`
    - optional `g_inv_metric`
    - optional `e_tetrad`
-4. Select it later with:
+4. Go back to [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py) and set:
    ```python
    METRIC_KEY = 'your_new_key'
    ```
 
-## Computation Flags
+## Useful Flags
 
-Inside [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py), you can still control the expensive steps with flags such as:
+Inside [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py), the most useful switches are:
 
-- `FAST_MODE = True`
-- `COMPUTE_TETRAD = True`
+- `FAST_MODE = True` to skip heavy invariant computations
+- `COMPUTE_TETRAD = True` to keep orthonormal-frame analysis enabled
 - `COMPUTE_WEYL = True`
 - `COMPUTE_KRETSCHMANN = True`
 - `OUTPUT_FILENAME = 'gr_report'`
@@ -112,7 +108,7 @@ Inside [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py), you can sti
 ## Project Structure
 
 - [gr_calculator.py](C:/Users/Nelson/Downloads/GR_python/gr_calculator.py): entry point
-- [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py): user configuration and pipeline
+- [gr_main.py](C:/Users/Nelson/Downloads/GR_python/gr_main.py): local user configuration and pipeline
 - [gr_metric_library.py](C:/Users/Nelson/Downloads/GR_python/gr_metric_library.py): built-in metric registry
 - [gr_tensors.py](C:/Users/Nelson/Downloads/GR_python/gr_tensors.py): symbolic tensor engine
 - [gr_latex.py](C:/Users/Nelson/Downloads/GR_python/gr_latex.py): LaTeX/PDF report builder
