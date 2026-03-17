@@ -804,6 +804,16 @@ def verify_tetrad(e_contra, g, dim=4):
     passed   : bool    — True if result == η up to cancel()
     residual : Matrix  — result − η  (all zeros if passed)
     """
+    if isinstance(e_contra, bool):
+        raise TypeError(
+            "e_contra must be a SymPy Matrix, not a boolean. "
+            "Did you mean to set COMPUTE_TETRAD = True instead of e_tetrad = True?"
+        )
+    if isinstance(g, bool):
+        raise TypeError(
+            "g must be a metric Matrix, not a boolean. "
+            "Check the arguments passed to verify_tetrad() or run_computations()."
+        )
     n = dim
     eta = Matrix(n, n, lambda i, j: (-1 if i == 0 else 1) if i == j else 0)
     result = zeros(n, n)
