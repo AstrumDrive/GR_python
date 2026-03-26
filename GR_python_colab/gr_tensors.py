@@ -34,9 +34,35 @@ def progress(msg):
     Used throughout computation functions to track long-running symbolic
     calculations. Defined here (the lowest-level module) so that gr_latex.py
     and gr_main.py can both import it from a single, cycle-free location.
+
+    On some local Windows consoles the active encoding is cp1252, which cannot
+    represent several Unicode symbols used in status messages. In that case we
+    degrade gracefully with ASCII replacements instead of crashing the run.
     """
     ts = time.strftime('%H:%M:%S')
-    print(f'[{ts}]  {msg}', flush=True)
+    text = f'[{ts}]  {msg}'
+    try:
+        print(text, flush=True)
+    except UnicodeEncodeError:
+        encoding = getattr(sys.stdout, 'encoding', None) or 'utf-8'
+        replacements = {
+            '\u03c1': 'rho',
+            '\u03bc': 'mu',
+            '\u03bd': 'nu',
+            '\u03b7': 'eta',
+            '\u2207': 'nabla',
+            '\u2192': '->',
+            '\u2260': '!=',
+            '\u2713': 'OK',
+            '\u2717': 'FAIL',
+            '\u2026': '...',
+            '\u2014': '-',
+        }
+        safe_text = text
+        for old_char, new_char in replacements.items():
+            safe_text = safe_text.replace(old_char, new_char)
+        safe = safe_text.encode(encoding, errors='replace').decode(encoding, errors='replace')
+        print(safe, flush=True)
 
 
 # Map coordinate symbol names to LaTeX strings for index labels.

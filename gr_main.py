@@ -203,6 +203,21 @@ AUTHOR_NAME     = "SymPy GR Engine"
 # SECTION 5 — COMPUTATION PIPELINE
 # ==============================================================================
 
+def validate_tetrad_input(e_tetrad):
+    """
+    Validate the optional user-supplied tetrad input.
+
+    The automatic path is controlled by COMPUTE_TETRAD. Passing a boolean as
+    e_tetrad is a common first-time mistake and should fail immediately, before
+    the symbolic pipeline spends time computing curvature tensors.
+    """
+    if isinstance(e_tetrad, bool):
+        raise TypeError(
+            "e_tetrad must be a SymPy Matrix or None, not a boolean. "
+            "Did you mean COMPUTE_TETRAD = True?"
+        )
+
+
 def run_computations(g_metric, coords, dim,
                      g_inv_metric=None,
                      e_tetrad=None,
@@ -241,6 +256,8 @@ def run_computations(g_metric, coords, dim,
         'geodesics', 'killing',
         'bianchi', 'trace_check'
     """
+    validate_tetrad_input(e_tetrad)
+
     results = {}
 
     # ---- Phase 1: Metric ----
@@ -330,12 +347,6 @@ def run_computations(g_metric, coords, dim,
     results['tetrad_residual']   = None
 
     active_tetrad = e_tetrad   # user-supplied takes priority
-
-    if isinstance(active_tetrad, bool):
-        raise TypeError(
-            "e_tetrad must be a SymPy Matrix or None, not a boolean. "
-            "Did you mean COMPUTE_TETRAD = True?"
-        )
 
     if active_tetrad is not None:
         # User-supplied tetrad: store and verify
@@ -511,6 +522,8 @@ def write_and_compile_pdf(report_lines, output_base):
 
 def main():
     wall_start = time.time()
+
+    validate_tetrad_input(e_tetrad)
 
     progress("=" * 60)
     progress(" GR CALCULATOR — Symbolic General Relativity Analysis")
