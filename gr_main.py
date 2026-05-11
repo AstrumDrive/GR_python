@@ -19,6 +19,9 @@ from gr_tensors import (
     compute_einstein, compute_kretschmann, compute_weyl, transform_to_ortho,
     check_bianchi, get_geodesic_equations, find_killing_coordinates,
     compute_energy_conditions, compute_tetrad_adm, verify_tetrad,
+    compute_covariant_derivative_1form, compute_covariant_derivative_vector,
+    compute_lie_derivative_metric, solve_killing_equation,
+    compute_conserved_quantities, compute_carter_constant,
     progress,                   # defined in gr_tensors (lowest-level module)
 )
 from gr_latex import assemble_report
@@ -189,8 +192,61 @@ COMPUTE_TETRAD      = True   # Auto-compute orthonormal tetrad via ADM decomposi
                               # A user-supplied e_tetrad above always takes priority.
 FAST_MODE           = False  # True = skip Weyl and Kretschmann (recommended for first runs)
 
+# --- NEW MODULES (all default to False to keep runtime fast) ---
+COMPUTE_PETROV      = False  # Newman-Penrose Weyl scalars Ψ₀–Ψ₄ + Petrov type (needs COMPUTE_WEYL + COMPUTE_TETRAD)
+COMPUTE_HORIZONS    = True   # Horizon detection, surface gravity, causal structure
+COMPUTE_KILLING_FULL= False  # Full Killing equation solver (slow; complements COMPUTE_KILLING)
+COMPUTE_CARTER      = False  # Carter constant / constants of motion (non-spherical metrics)
+COMPUTE_MATTER      = False  # Matter field T_{μν}: set fields below in 1.7
+COMPUTE_ADM31       = False  # Full 3+1 ADM decomposition + Hamiltonian/momentum constraints + ADM mass
+COMPUTE_PENROSE     = True   # Penrose-Carter conformal diagrams (requires matplotlib)
+COMPUTE_GEODESIC_NUM= False  # Numerical geodesic integration (requires scipy)
+
 # ------------------------------------------------------------------------------
-# 1.7  OUTPUT / DISPLAY OPTIONS
+# 1.7  MATTER FIELD CONFIGURATION  (only used when COMPUTE_MATTER = True)
+#      Set the fields you want to include.
+# ------------------------------------------------------------------------------
+# Uncomment and define the field(s) you want:
+
+# Scalar field:
+# phi_scalar = Function('phi')(r)      # e.g. a static radial scalar
+# scalar_mass = symbols('m_s', positive=True)
+
+# Vector potential A_μ (Maxwell):
+# Q_charge = symbols('Q', real=True)
+# A_maxwell = [Q_charge / r, 0, 0, 0]  # Coulomb potential
+
+# Spin-2 perturbation h_{μν}:
+# h_spin2 = zeros(dim)  # define non-zero components here
+# m_graviton = symbols('m_g', positive=True)
+
+MATTER_CONFIG = {
+    'scalar_field':     None,   # set to a SymPy expression
+    'scalar_mass':      None,
+    'vector_potential': None,   # set to a list [A_0, A_1, A_2, A_3]
+    'four_current':     None,
+    'spin2_field':      None,
+    'graviton_mass':    None,
+}
+
+# ------------------------------------------------------------------------------
+# 1.8  NUMERICAL GEODESIC CONFIGURATION  (only used when COMPUTE_GEODESIC_NUM = True)
+# ------------------------------------------------------------------------------
+# Parameter values to substitute for numerical integration:
+NUMERIC_PARAMS  = {'M': 1.0}      # e.g. {'M': 1.0, 'a': 0.5, 'Q': 0.3}
+
+# Initial conditions [t, r, θ, φ] and [u_t, u_r, u_θ, u_φ]:
+GEODESIC_X0     = [0.0, 10.0, sp.pi/2, 0.0]
+GEODESIC_U0     = [-1.0, 0.0, 0.0, 0.1]   # timelike: norm ≈ −1
+
+# Affine parameter range:
+GEODESIC_LAMBDA = (0, 2000)
+
+# Output path for geodesic plot (None = don't save):
+GEODESIC_PLOT_PATH = None   # e.g. "geodesic.png"
+
+# ------------------------------------------------------------------------------
+# 1.9  OUTPUT / DISPLAY OPTIONS
 # ------------------------------------------------------------------------------
 OUTPUT_FILENAME = "gr_report"      # Base filename for .tex and .pdf (no extension)
 AUTHOR_NAME     = "nebolivar and his AI partners :)"
@@ -226,7 +282,21 @@ def run_computations(g_metric, coords, dim,
                      compute_geodesics_flag=True,
                      compute_killing_flag=True,
                      compute_tetrad_flag=True,
-                     fast_mode=False):
+                     fast_mode=False,
+                     compute_petrov_flag=False,
+                     compute_horizons_flag=True,
+                     compute_killing_full_flag=False,
+                     compute_carter_flag=False,
+                     compute_matter_flag=False,
+                     compute_adm31_flag=False,
+                     compute_penrose_flag=True,
+                     compute_geodesic_num_flag=False,
+                     matter_config=None,
+                     numeric_params=None,
+                     geodesic_x0=None,
+                     geodesic_u0=None,
+                     geodesic_lambda=(0, 1000),
+                     geodesic_plot_path=None):
     """
     Master computation function — runs all GR calculations in sequence.
 
@@ -245,16 +315,23 @@ def run_computations(g_metric, coords, dim,
     compute_geodesics_flag  : bool
     compute_killing_flag    : bool
     fast_mode               : bool          — if True, skip Weyl and Kretschmann
+    compute_petrov_flag     : bool
+    compute_horizons_flag   : bool
+    compute_killing_full_flag: bool
+    compute_carter_flag     : bool
+    compute_matter_flag     : bool
+    compute_adm31_flag      : bool
+    compute_penrose_flag    : bool
+    compute_geodesic_num_flag: bool
+    matter_config           : dict or None
+    numeric_params          : dict or None
+    geodesic_x0, geodesic_u0: lists for numeric geodesic ICs
+    geodesic_lambda         : (start, end) affine parameter range
+    geodesic_plot_path      : str or None
 
     Returns
     -------
-    results : dict with keys:
-        'g', 'ginv', 'det_g',
-        'Gamma', 'R_riem', 'Ric', 'R_scalar',
-        'G', 'K', 'Weyl',
-        'G_ortho', 'energy_conditions',
-        'geodesics', 'killing',
-        'bianchi', 'trace_check'
+    results : dict
     """
     validate_tetrad_input(e_tetrad)
 
@@ -428,6 +505,204 @@ def run_computations(g_metric, coords, dim,
     )
     results['trace_check'] = trace_residual
 
+    # ---- Phase 9: Newman-Penrose / Petrov ----
+    if compute_petrov_flag and not fast_mode and dim == 4:
+        progress("=" * 60)
+        progress("PHASE 9: NEWMAN-PENROSE / PETROV CLASSIFICATION")
+        progress("=" * 60)
+        if results['Weyl'] is None:
+            progress("  Petrov: Weyl tensor not available. Set COMPUTE_WEYL=True.")
+            results['petrov'] = None
+        elif active_tetrad is None:
+            progress("  Petrov: orthonormal tetrad not available. Set COMPUTE_TETRAD=True.")
+            results['petrov'] = None
+        else:
+            try:
+                from gr_petrov import build_np_tetrad, verify_np_tetrad, compute_weyl_scalars, classify_petrov, compute_bel_robinson
+                np_tetrad = build_np_tetrad(active_tetrad, dim)
+                verify_np_tetrad(np_tetrad, results['g'], dim)
+                weyl_scalars = compute_weyl_scalars(results['Weyl'], np_tetrad, results['g'], dim)
+                petrov_class = classify_petrov(weyl_scalars)
+                bel_rob = compute_bel_robinson(results['Weyl'], results['g'], results['ginv'], dim)
+                results['petrov'] = {
+                    'np_tetrad':    np_tetrad,
+                    'weyl_scalars': weyl_scalars,
+                    'classification': petrov_class,
+                    'bel_robinson': bel_rob,
+                }
+            except Exception as exc:
+                progress(f"  WARNING: Petrov computation failed: {exc}")
+                results['petrov'] = None
+    else:
+        results['petrov'] = None
+        if compute_petrov_flag:
+            progress("  Petrov: SKIPPED (fast_mode or dim≠4 or Weyl disabled)")
+
+    # ---- Phase 10: Horizons & Causal Structure ----
+    if compute_horizons_flag and dim == 4:
+        progress("=" * 60)
+        progress("PHASE 10: HORIZONS & CAUSAL STRUCTURE")
+        progress("=" * 60)
+        try:
+            from gr_horizons import analyse_horizons
+            results['horizons'] = analyse_horizons(
+                results['g'], results['ginv'], results['Gamma'], coords, dim
+            )
+        except Exception as exc:
+            progress(f"  WARNING: Horizon analysis failed: {exc}")
+            results['horizons'] = None
+    else:
+        results['horizons'] = None
+
+    # ---- Phase 11: Full Killing Equation Solver ----
+    if compute_killing_full_flag:
+        progress("=" * 60)
+        progress("PHASE 11: FULL KILLING EQUATION SOLVER")
+        progress("=" * 60)
+        try:
+            from gr_tensors import solve_killing_equation, compute_conserved_quantities, compute_carter_constant
+            results['killing_full'] = solve_killing_equation(
+                results['g'], results['Gamma'], coords, dim
+            )
+            results['conserved_full'] = compute_conserved_quantities(
+                results['g'], results['ginv'], coords, results['killing_full'], dim
+            )
+        except Exception as exc:
+            progress(f"  WARNING: Killing equation solver failed: {exc}")
+            results['killing_full'] = None
+            results['conserved_full'] = None
+    else:
+        results['killing_full']   = None
+        results['conserved_full'] = None
+
+    # ---- Phase 12: Carter Constant ----
+    if compute_carter_flag:
+        progress("=" * 60)
+        progress("PHASE 12: CARTER CONSTANT")
+        progress("=" * 60)
+        try:
+            from gr_tensors import compute_carter_constant
+            results['carter'] = compute_carter_constant(
+                results['g'], results['ginv'], coords, dim
+            )
+        except Exception as exc:
+            progress(f"  WARNING: Carter constant computation failed: {exc}")
+            results['carter'] = None
+    else:
+        results['carter'] = None
+
+    # ---- Phase 13: Matter Fields ----
+    if compute_matter_flag and matter_config is not None:
+        progress("=" * 60)
+        progress("PHASE 13: MATTER FIELD STRESS-ENERGY TENSORS")
+        progress("=" * 60)
+        try:
+            from gr_matter import compute_matter_content
+            results['matter'] = compute_matter_content(
+                results['g'], results['ginv'], results['Gamma'], coords, dim,
+                scalar_field      = matter_config.get('scalar_field'),
+                scalar_mass       = matter_config.get('scalar_mass'),
+                vector_potential  = matter_config.get('vector_potential'),
+                four_current      = matter_config.get('four_current'),
+                spin2_field       = matter_config.get('spin2_field'),
+                graviton_mass     = matter_config.get('graviton_mass'),
+            )
+        except Exception as exc:
+            progress(f"  WARNING: Matter computation failed: {exc}")
+            results['matter'] = None
+    else:
+        results['matter'] = None
+
+    # ---- Phase 14: ADM 3+1 Decomposition ----
+    if compute_adm31_flag and dim == 4:
+        progress("=" * 60)
+        progress("PHASE 14: ADM 3+1 DECOMPOSITION")
+        progress("=" * 60)
+        try:
+            from gr_adm31 import run_adm31
+            results['adm31'] = run_adm31(
+                results['g'], results['ginv'], results['Gamma'], coords, dim
+            )
+        except Exception as exc:
+            progress(f"  WARNING: ADM 3+1 computation failed: {exc}")
+            results['adm31'] = None
+    else:
+        results['adm31'] = None
+
+    # ---- Phase 15: Penrose Diagrams ----
+    if compute_penrose_flag:
+        progress("=" * 60)
+        progress("PHASE 15: PENROSE-CARTER DIAGRAMS")
+        progress("=" * 60)
+        try:
+            from gr_penrose import draw_penrose_diagram, list_penrose_spacetimes
+            # Try to match METRIC_KEY to a known Penrose spacetime
+            penrose_key = None
+            known = list_penrose_spacetimes()
+            if METRIC_KEY in known:
+                penrose_key = METRIC_KEY
+            elif 'schwarzschild' in METRIC_KEY:
+                penrose_key = 'schwarzschild'
+            elif 'kerr' in METRIC_KEY:
+                penrose_key = 'kerr'
+            elif 'reissner' in METRIC_KEY:
+                penrose_key = 'reissner_nordstrom'
+            elif 'de_sitter' in METRIC_KEY or 'ads' in METRIC_KEY:
+                penrose_key = 'de_sitter' if 'anti' not in METRIC_KEY else 'anti_de_sitter'
+            elif 'minkowski' in METRIC_KEY:
+                penrose_key = 'minkowski'
+
+            if penrose_key:
+                results['penrose_fig'] = draw_penrose_diagram(penrose_key)
+                results['penrose_key'] = penrose_key
+                progress(f"  Penrose diagram generated for: {penrose_key}")
+            else:
+                progress("  No matching Penrose diagram for this metric.")
+                results['penrose_fig'] = None
+                results['penrose_key'] = None
+        except Exception as exc:
+            progress(f"  WARNING: Penrose diagram generation failed: {exc}")
+            results['penrose_fig'] = None
+            results['penrose_key'] = None
+    else:
+        results['penrose_fig'] = None
+        results['penrose_key'] = None
+
+    # ---- Phase 16: Numerical Geodesic ----
+    if compute_geodesic_num_flag and geodesic_x0 is not None and geodesic_u0 is not None:
+        progress("=" * 60)
+        progress("PHASE 16: NUMERICAL GEODESIC INTEGRATION")
+        progress("=" * 60)
+        try:
+            from gr_geodesic_numeric import (
+                lambdify_christoffel, lambdify_metric,
+                integrate_geodesic, check_conserved, plot_geodesic
+            )
+            ps = numeric_params or {}
+            Gamma_num, _ = lambdify_christoffel(results['Gamma'], coords, dim, ps)
+            g_num, ginv_num = lambdify_metric(results['g'], results['ginv'], coords, dim, ps)
+
+            x0_num = [float(xi) if not hasattr(xi, 'subs') else float(xi.subs(ps))
+                      for xi in geodesic_x0]
+            u0_num = [float(ui) if not hasattr(ui, 'subs') else float(ui.subs(ps))
+                      for ui in geodesic_u0]
+
+            sol = integrate_geodesic(Gamma_num, x0_num, u0_num, geodesic_lambda, dim)
+            conserved = check_conserved(sol, g_num, ginv_num,
+                                        killing_indices=[0, 3] if dim == 4 else [0], dim=dim)
+            if geodesic_plot_path or True:
+                fig = plot_geodesic(conserved, coords,
+                                    output_path=geodesic_plot_path)
+            results['geodesic_num'] = {
+                'sol': sol, 'conserved': conserved,
+                'norm_drift': conserved['norm_drift'],
+            }
+        except Exception as exc:
+            progress(f"  WARNING: Numerical geodesic failed: {exc}")
+            results['geodesic_num'] = None
+    else:
+        results['geodesic_num'] = None
+
     progress("=" * 60)
     progress("ALL COMPUTATIONS COMPLETE")
     progress("=" * 60)
@@ -554,6 +829,20 @@ def main():
         compute_killing_flag     = COMPUTE_KILLING,
         compute_tetrad_flag      = COMPUTE_TETRAD,
         fast_mode                = FAST_MODE,
+        compute_petrov_flag      = COMPUTE_PETROV,
+        compute_horizons_flag    = COMPUTE_HORIZONS,
+        compute_killing_full_flag= COMPUTE_KILLING_FULL,
+        compute_carter_flag      = COMPUTE_CARTER,
+        compute_matter_flag      = COMPUTE_MATTER,
+        compute_adm31_flag       = COMPUTE_ADM31,
+        compute_penrose_flag     = COMPUTE_PENROSE,
+        compute_geodesic_num_flag= COMPUTE_GEODESIC_NUM,
+        matter_config            = MATTER_CONFIG,
+        numeric_params           = NUMERIC_PARAMS,
+        geodesic_x0              = GEODESIC_X0,
+        geodesic_u0              = GEODESIC_U0,
+        geodesic_lambda          = GEODESIC_LAMBDA,
+        geodesic_plot_path       = GEODESIC_PLOT_PATH,
     )
 
     # Assemble the LaTeX report

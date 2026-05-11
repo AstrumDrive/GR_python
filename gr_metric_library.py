@@ -19,7 +19,7 @@ the existing entries.
 """
 
 import sympy as sp
-from sympy import Function, Matrix, exp, sin
+from sympy import Function, Matrix, exp, sin, cos, sqrt, symbols, Rational
 from gr_warp import build_metric_configuration
 
 
@@ -57,6 +57,18 @@ def build_builtin_metric_library(coords, parameter_context=None):
     warp_doc_baseline = build_metric_configuration("baseline", coords, beta_doc)
     warp_doc_variant_a = build_metric_configuration("variant_a", coords, beta_doc, B_doc)
     warp_doc_variant_b = build_metric_configuration("variant_b", coords, beta_doc, B_doc)
+
+    # Kerr metric parameters
+    a_kerr = parameter_context.get("a", sp.symbols("a", real=True))  # spin parameter
+    rho2 = r**2 + a_kerr**2 * cos(theta)**2                         # ρ² = r² + a²cos²θ
+    Delta = r**2 - 2*M*r + a_kerr**2                                 # Δ = r² - 2Mr + a²
+    Sigma = (r**2 + a_kerr**2)**2 - a_kerr**2 * Delta * sin(theta)**2  # Σ² (for g_φφ)
+
+    # Kerr-Newman parameters
+    Delta_kn = r**2 - 2*M*r + a_kerr**2 + Q**2
+
+    # Anti-de Sitter Schwarzschild
+    f_ads = 1 - 2*M/r - Lambda*r**2/3
 
     return {
         "schwarzschild": {
@@ -193,6 +205,68 @@ def build_builtin_metric_library(coords, parameter_context=None):
             "metric_description": warp_doc_variant_b["description"],
             "g_inv_metric": None,
             "e_tetrad": warp_doc_variant_b["e_tetrad"],
+        },
+        "kerr": {
+            "g_metric": Matrix([
+                [-(1 - 2*M*r/rho2), 0, 0, 2*M*r*a_kerr*sin(theta)**2/rho2],
+                [0, rho2/Delta, 0, 0],
+                [0, 0, rho2, 0],
+                [2*M*r*a_kerr*sin(theta)**2/rho2, 0, 0,
+                 (r**2 + a_kerr**2 + 2*M*r*a_kerr**2*sin(theta)**2/rho2)*sin(theta)**2],
+            ]),
+            "metric_name": "Kerr (Boyer-Lindquist)",
+            "metric_description": (
+                "Rotating black hole with mass M and specific angular momentum a; "
+                "rho^2 = r^2 + a^2 cos^2(theta), Delta = r^2 - 2Mr + a^2"
+            ),
+            "g_inv_metric": None,
+            "e_tetrad": None,
+        },
+        "kerr_newman": {
+            "g_metric": Matrix([
+                [-(1 - (2*M*r - Q**2)/rho2), 0, 0,
+                 (2*M*r - Q**2)*a_kerr*sin(theta)**2/rho2],
+                [0, rho2/Delta_kn, 0, 0],
+                [0, 0, rho2, 0],
+                [(2*M*r - Q**2)*a_kerr*sin(theta)**2/rho2, 0, 0,
+                 (r**2 + a_kerr**2 + (2*M*r - Q**2)*a_kerr**2*sin(theta)**2/rho2)*sin(theta)**2],
+            ]),
+            "metric_name": "Kerr-Newman (Boyer-Lindquist)",
+            "metric_description": (
+                "Charged rotating black hole with mass M, charge Q, spin a; "
+                "Delta_KN = r^2 - 2Mr + a^2 + Q^2"
+            ),
+            "g_inv_metric": None,
+            "e_tetrad": None,
+        },
+        "ads_schwarzschild": {
+            "g_metric": Matrix([
+                [-f_ads, 0, 0, 0],
+                [0, 1/f_ads, 0, 0],
+                [0, 0, r**2, 0],
+                [0, 0, 0, r**2*sin(theta)**2],
+            ]),
+            "metric_name": "Schwarzschild-AdS",
+            "metric_description": (
+                "Schwarzschild black hole in Anti-de Sitter background; "
+                "f = 1 - 2M/r - Lambda*r^2/3 with Lambda < 0 for AdS"
+            ),
+            "g_inv_metric": None,
+            "e_tetrad": None,
+        },
+        "anti_de_sitter": {
+            "g_metric": Matrix([
+                [-(1 + r**2), 0, 0, 0],
+                [0, 1/(1 + r**2), 0, 0],
+                [0, 0, r**2, 0],
+                [0, 0, 0, r**2*sin(theta)**2],
+            ]),
+            "metric_name": "Anti-de Sitter (global)",
+            "metric_description": (
+                "Global Anti-de Sitter spacetime in static coordinates with unit AdS radius"
+            ),
+            "g_inv_metric": None,
+            "e_tetrad": None,
         },
         "pg_spatial_conformal": {
             "g_metric": Matrix([

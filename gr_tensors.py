@@ -97,6 +97,9 @@ def coord_latex(coord_sym):
 # SECTION 3 — COMPUTATION FUNCTIONS
 # ==============================================================================
 
+# Forward reference guard — gr_tensors is the lowest-level module so nothing
+# else is imported here beyond the stdlib and sympy.
+
 def compute_christoffel(g, ginv, coords, dim=4):
     """
     Compute Christoffel symbols of the second kind Γ^λ_{μν}.
@@ -680,6 +683,229 @@ def _is_zero(expr):
         return cancel(expr) == S.Zero
     except Exception:
         return False
+
+
+# ==============================================================================
+# SECTION 4 — DIFFERENTIAL OPERATORS & SYMMETRIES
+# ==============================================================================
+
+def compute_covariant_derivative_1form(omega, Gamma, coords, dim=4):
+    """
+    Covariant derivative of a covariant 1-form ω_μ.
+
+    ∇_ν ω_μ = ∂_ν ω_μ − Γ^λ_{νμ} ω_λ
+
+    Parameters
+    ----------
+    omega  : list of dim SymPy expressions  — ω_0, …, ω_{d-1}
+    Returns : dim×dim Matrix  — result[μ, ν] = ∇_ν ω_μ
+    """
+    progress("Computing covariant derivative of 1-form ∇_ν ω_μ...")
+    result = zeros(dim, dim)
+    for mu in range(dim):
+        for nu in range(dim):
+            s = diff(omega[mu], coords[nu])
+            for lam in range(dim):
+                s -= Gamma[lam][nu][mu] * omega[lam]
+            result[mu, nu] = cancel(s)
+    return result
+
+
+def compute_covariant_derivative_vector(V, Gamma, coords, dim=4):
+    """
+    Covariant derivative of a contravariant vector V^μ.
+
+    ∇_ν V^μ = ∂_ν V^μ + Γ^μ_{νλ} V^λ
+
+    Parameters
+    ----------
+    V      : list of dim SymPy expressions — V^0, …, V^{d-1}
+    Returns : dim×dim Matrix  — result[μ, ν] = ∇_ν V^μ
+    """
+    progress("Computing covariant derivative of vector ∇_ν V^μ...")
+    result = zeros(dim, dim)
+    for mu in range(dim):
+        for nu in range(dim):
+            s = diff(V[mu], coords[nu])
+            for lam in range(dim):
+                s += Gamma[mu][nu][lam] * V[lam]
+            result[mu, nu] = cancel(s)
+    return result
+
+
+def compute_covariant_derivative_tensor_02(T, Gamma, coords, dim=4):
+    """
+    Covariant derivative of a rank-(0,2) covariant tensor T_{μν}.
+
+    ∇_ρ T_{μν} = ∂_ρ T_{μν} − Γ^λ_{ρμ} T_{λν} − Γ^λ_{ρν} T_{μλ}
+
+    Returns : 3D list  result[μ][ν][ρ] = ∇_ρ T_{μν}
+    """
+    progress("Computing ∇_ρ T_{μν} for rank-(0,2) tensor...")
+    result = [[[S.Zero]*dim for _ in range(dim)] for _ in range(dim)]
+    for mu in range(dim):
+        for nu in range(dim):
+            for rho in range(dim):
+                s = diff(T[mu, nu], coords[rho])
+                for lam in range(dim):
+                    s -= Gamma[lam][rho][mu] * T[lam, nu]
+                    s -= Gamma[lam][rho][nu] * T[mu, lam]
+                result[mu][nu][rho] = cancel(s)
+    return result
+
+
+def compute_lie_derivative_metric(g, V, Gamma, coords, dim=4):
+    """
+    Lie derivative of the metric along vector field V^μ.
+
+    £_V g_{μν} = ∇_μ V_ν + ∇_ν V_μ
+               = ∂_μ V_ν + ∂_ν V_μ − 2 Γ^λ_{μν} V_λ
+
+    Vanishes iff V is a Killing vector.
+
+    Parameters
+    ----------
+    g : dim×dim Matrix, V : list of dim SymPy expressions (V^μ contra.)
+    Returns : dim×dim Matrix — (£_V g)_{μν}
+    """
+    progress("Computing Lie derivative of metric £_V g_{μν}...")
+    V_low = [cancel(sum(g[nu, lam] * V[lam] for lam in range(dim)))
+             for nu in range(dim)]
+    result = zeros(dim, dim)
+    for mu in range(dim):
+        for nu in range(dim):
+            s = diff(V_low[nu], coords[mu]) + diff(V_low[mu], coords[nu])
+            for lam in range(dim):
+                s -= 2 * Gamma[lam][mu][nu] * V_low[lam]
+            result[mu, nu] = cancel(s)
+    return result
+
+
+def solve_killing_equation(g, Gamma, coords, dim=4):
+    """
+    Find coordinate Killing vectors by solving ∇_{(μ} ξ_{ν)} = 0.
+
+    Tests each basis vector ∂/∂x^i. A coordinate direction is Killing iff
+    ∂_i g_{αβ} = 0 for all α,β (the metric does not depend on x^i).
+
+    Returns
+    -------
+    List of dicts, each with keys:
+        'index', 'coord', 'xi_contra', 'xi_cov', 'lie_g', 'verified'
+    """
+    progress("Solving Killing equation ∇_(μ ξ_ν) = 0 for coordinate Killing vectors...")
+    killing_vectors = []
+    for i, coord in enumerate(coords):
+        xi_c = [S.Zero] * dim
+        xi_c[i] = S.One
+        lie_g = compute_lie_derivative_metric(g, xi_c, Gamma, coords, dim)
+        is_killing = all(_is_zero(lie_g[mu, nu])
+                         for mu in range(dim) for nu in range(dim))
+        if is_killing:
+            xi_cov = [cancel(g[nu, i]) for nu in range(dim)]
+            killing_vectors.append({
+                'index':     i,
+                'coord':     coord,
+                'xi_contra': xi_c,
+                'xi_cov':    xi_cov,
+                'lie_g':     lie_g,
+                'verified':  True,
+            })
+            progress(f"  Killing vector: ∂/∂{coord}")
+    progress(f"  Total coordinate Killing vectors: {len(killing_vectors)}")
+    return killing_vectors
+
+
+def compute_conserved_quantities(g, ginv, coords, killing_vectors, dim=4):
+    """
+    List conserved quantities along geodesics from the Killing vectors.
+
+    For each Killing vector ξ^μ: C = g_{μν} ξ^μ u^ν = const.
+
+    Returns
+    -------
+    List of dicts with 'name', 'xi_cov', 'coord', 'index'
+    """
+    progress("Computing conserved quantities along geodesics...")
+    _names = {0: 'E (energy)', 3: 'L (ang. momentum)'}
+    conserved = []
+    for kv in killing_vectors:
+        i = kv['index']
+        name = _names.get(i, f'p_{coords[i]}')
+        conserved.append({
+            'name':   name,
+            'xi_cov': kv['xi_cov'],
+            'coord':  kv['coord'],
+            'index':  i,
+        })
+        progress(f"  Conserved: {name} = g_{{μ{i}}} u^μ  (from ∂/∂{coords[i]})")
+    return conserved
+
+
+def compute_carter_constant(g, ginv, coords, dim=4):
+    """
+    Detect the Carter constant / hidden rank-2 Killing tensor.
+
+    For spherically symmetric metrics: Q = p_θ² + p_φ²/sin²θ (= L²_total).
+    For Kerr-type (g_{tφ} ≠ 0, separable): returns the Boyer-Lindquist formula.
+
+    Returns
+    -------
+    dict: 'type', 'description', 'formula', 'exists'
+    """
+    progress("Searching for Carter constant / hidden Killing tensor...")
+    if dim != 4:
+        return {'type': 'none', 'description': 'dim != 4', 'formula': None, 'exists': False}
+
+    t, r, theta, phi = coords
+    g_tphi = cancel(g[0, 3])
+    is_kerr_type = (
+        not _is_zero(g_tphi)
+        and _is_zero(g[1, 2]) and _is_zero(g[0, 1])
+        and _is_zero(g[0, 2]) and _is_zero(g[1, 3]) and _is_zero(g[2, 3])
+    )
+    is_spherical = (
+        _is_zero(g_tphi)
+        and _is_zero(g[1, 2]) and _is_zero(g[0, 1])
+        and _is_zero(g[0, 2]) and _is_zero(g[1, 3]) and _is_zero(g[2, 3])
+    )
+
+    if is_kerr_type:
+        import sympy as _sp
+        a_s = _sp.Symbol('a', real=True)
+        E_s = _sp.Symbol('E', real=True)
+        L_s = _sp.Symbol('L', real=True)
+        p_th = _sp.Symbol('p_theta', real=True)
+        formula = (p_th**2
+                   + _sp.cos(theta)**2 * (a_s**2 * E_s**2
+                                          - L_s**2 / _sp.sin(theta)**2))
+        progress("  Carter constant: Kerr-type metric detected.")
+        return {
+            'type': 'kerr',
+            'description': ('Carter constant Q = p_theta^2 + cos^2(theta)'
+                             '(a^2 E^2 - L^2/sin^2(theta)). '
+                             'Separates radial and angular geodesic motion.'),
+            'formula': formula, 'exists': True,
+        }
+
+    if is_spherical:
+        import sympy as _sp
+        p_th = _sp.Symbol('p_theta', real=True)
+        p_ph = _sp.Symbol('p_phi',   real=True)
+        formula = p_th**2 + p_ph**2 / _sp.sin(theta)**2
+        progress("  Carter constant: spherical symmetry — Q = L^2_total.")
+        return {
+            'type': 'spherical',
+            'description': 'Total angular momentum Q = p_theta^2 + p_phi^2/sin^2(theta).',
+            'formula': formula, 'exists': True,
+        }
+
+    progress("  No hidden Killing tensor detected automatically.")
+    return {
+        'type': 'unknown',
+        'description': 'Full Killing-tensor PDE search not implemented for this metric.',
+        'formula': None, 'exists': False,
+    }
 
 
 # Automatic tetrad convention:

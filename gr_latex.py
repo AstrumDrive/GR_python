@@ -1371,6 +1371,318 @@ def assemble_report(results, coords, dim, metric_name, description,
         RL.append(r'  \Delta^\mu{}_\nu = ' + matrix_to_latex(id_residual))
         RL.append(r'\end{equation}')
 
+    # =========================================================================
+    # SECTION 12 — HORIZONS & CAUSAL STRUCTURE
+    # =========================================================================
+    if R.get('horizons') is not None:
+        RL.append(r'\section{Horizons and Causal Structure}')
+        h_info  = R['horizons']['horizons']
+        h_roots = h_info.get('horizon_roots', [])
+
+        RL.append(r'\subsection{Event Horizons}')
+        RL.append(
+            r'Event horizons are located at zeros of $g^{rr}(r) = 0$ '
+            r'(equivalently, where $g_{rr}$ diverges and the radial direction becomes null).'
+        )
+        if h_roots:
+            RL.append(r'\begin{itemize}')
+            for rt in h_roots:
+                RL.append(r'\item $r = ' + lat(rt) + r'$')
+            RL.append(r'\end{itemize}')
+        else:
+            RL.append(r'\textit{No horizon roots found (globally regular spacetime or naked singularity).}')
+
+        sl_roots = h_info.get('static_limit_roots', [])
+        if sl_roots:
+            RL.append(r'\subsection{Static-Limit Surface (Ergosphere Boundary)}')
+            RL.append(r'Zeros of $g_{tt} = 0$ (equatorial section $\theta=\pi/2$):')
+            RL.append(r'\begin{itemize}')
+            for rt in sl_roots:
+                RL.append(r'\item $r = ' + lat(rt) + r'$')
+            RL.append(r'\end{itemize}')
+            if h_info.get('ergosphere_exists'):
+                RL += make_tcolorbox('Ergosphere Detected',
+                    [r'\textbf{The static-limit surface lies outside the event horizon.} '
+                     r'Inside the ergosphere, $\partial/\partial t$ is space-like. '
+                     r'Observers cannot remain stationary; the Penrose process extracts energy.'],
+                    'boxgreen')
+
+        RL.append(r'\subsection{Causal Structure Summary}')
+        causal = R['horizons'].get('causal', {})
+        cs_type = causal.get('type', 'unknown').replace('_', ' ').title()
+        RL.append(r'\textbf{Type:} ' + cs_type + r'\\[4pt]')
+        RL.append(r'\textbf{Penrose diagram:} ' + causal.get('penrose_type', '') + r'\\[4pt]')
+        regions = causal.get('causal_regions', [])
+        if regions:
+            RL.append(r'\textbf{Causal regions:} ' + ', '.join(regions) + r'.\\[4pt]')
+        notes = causal.get('notes', '')
+        if notes:
+            RL.append(r'\textit{' + notes.replace('_', r'\_') + r'}')
+        if causal.get('globally_hyperbolic') is True:
+            RL.append(r'\\[4pt]\textit{The spacetime is globally hyperbolic (admits a Cauchy surface).}')
+        elif causal.get('globally_hyperbolic') is False:
+            RL.append(r'\\[4pt]\textit{The spacetime is \textbf{not} globally hyperbolic.}')
+
+        sg_list = R['horizons'].get('surface_gravity', [])
+        if sg_list:
+            RL.append(r'\subsection{Surface Gravity and Hawking Temperature}')
+            RL.append(
+                r'For a Killing horizon with Killing vector $\xi^\mu = \partial/\partial t$, '
+                r'the surface gravity $\kappa$ satisfies $\xi^\nu\nabla_\nu\xi^\mu = \kappa\xi^\mu$. '
+                r'Hawking temperature: $T_H = \hbar\kappa/(2\pi k_B c)$.'
+            )
+            for sg in sg_list:
+                if sg.get('kappa') is not None:
+                    RL += split_long_equation(
+                        r'\kappa\big|_{r=' + lat(sg['r_horizon']) + r'}',
+                        lat(sg['kappa']))
+                    RL += split_long_equation(
+                        r'T_H\big|_{r=' + lat(sg['r_horizon']) + r'}',
+                        lat(sg['hawking_T']))
+
+        exp_info = R['horizons'].get('expansion', {})
+        if exp_info and exp_info.get('theta_out') is not None:
+            RL.append(r'\subsection{Null Expansion and Trapped Surfaces}')
+            RL.append(
+                r'The expansion $\theta = \nabla_\mu k^\mu$ of the outgoing null congruence '
+                r'with tangent $k^\mu$ vanishes at the apparent horizon '
+                r'and is negative inside trapped surfaces.'
+            )
+            RL += split_long_equation(r'\theta_{\rm out}', lat(exp_info['theta_out']))
+            RL += split_long_equation(r'\theta_{\rm in}',  lat(exp_info['theta_in']))
+            ah = exp_info.get('apparent_horizon', [])
+            if ah:
+                RL.append(r'Apparent horizon ($\theta_{\rm out}=0$) at $r = '
+                          + lat(ah[0]) + r'$.')
+
+    # =========================================================================
+    # SECTION 13 — PETROV CLASSIFICATION
+    # =========================================================================
+    if R.get('petrov') is not None:
+        RL.append(r'\section{Newman-Penrose Formalism and Petrov Classification}')
+        petrov = R['petrov']
+        pclass = petrov.get('classification', {})
+        ptype  = pclass.get('type', '?')
+        pdesc  = pclass.get('description', '')
+
+        RL.append(r'\subsection{Newman-Penrose Weyl Scalars}')
+        RL.append(
+            r'The five complex Weyl scalars $\Psi_k$ are computed by contracting the '
+            r'Weyl tensor with the NP null tetrad $\{l^\mu, n^\mu, m^\mu, \bar{m}^\mu\}$:'
+        )
+        RL.append(r'\begin{align*}')
+        RL.append(r'  \Psi_0 &= C_{abcd}\,l^a m^b l^c m^d, &'
+                  r'  \Psi_1 &= C_{abcd}\,l^a n^b l^c m^d,\\')
+        RL.append(r'  \Psi_2 &= C_{abcd}\,l^a m^b \bar{m}^c n^d, &'
+                  r'  \Psi_3 &= C_{abcd}\,l^a n^b \bar{m}^c n^d,\\')
+        RL.append(r'  \Psi_4 &= C_{abcd}\,n^a \bar{m}^b n^c \bar{m}^d.')
+        RL.append(r'\end{align*}')
+
+        ws = petrov.get('weyl_scalars', {})
+        for k in range(5):
+            key = f'Psi{k}'
+            if ws.get(key) is not None:
+                RL += split_long_equation(rf'\Psi_{k}', lat(ws[key]))
+
+        RL.append(r'\subsection{Petrov Algebraic Type}')
+        color = ('boxgreen' if ptype in ('D', 'O') else
+                 'boxred'   if ptype == 'I'         else 'boxgreen')
+        RL += make_tcolorbox(
+            f'Petrov Type {ptype}',
+            [r'\textbf{Type ' + ptype + r':} ' + pdesc.replace('_', r'\_')],
+            color
+        )
+
+        I_inv = pclass.get('I_invariant')
+        if I_inv is not None:
+            RL.append(r'\subsection{Frame-Invariant Scalars}')
+            RL.append(
+                r'These invariants are independent of the NP tetrad choice: '
+                r'$I = \Psi_0\Psi_4 - 4\Psi_1\Psi_3 + 3\Psi_2^2$, '
+                r'$J = \det(\Psi\text{-matrix})$, '
+                r'$D = I^3 - 6J^2$ (vanishes for types D, N, III, O).'
+            )
+            RL += split_long_equation(r'I', lat(I_inv))
+            RL += split_long_equation(r'J', lat(pclass['J_invariant']))
+            RL += split_long_equation(r'D', lat(pclass['D_invariant']))
+
+        br = petrov.get('bel_robinson', {})
+        if br.get('computed'):
+            RL.append(r'\subsection{Bel-Robinson Super-Energy Tensor}')
+            RL.append(
+                r'$T_{\alpha\beta\gamma\delta} = C_{\alpha\rho\beta\sigma}C^\rho{}_\gamma{}^\sigma{}_\delta '
+                r'+ {}^*C{}^*C$ (the GR analogue of $T^{\rm EM}_{\mu\nu}$). '
+                r'Totally symmetric, traceless, and covariantly conserved in vacuum.'
+            )
+            if br.get('T_0000') is not None:
+                RL += split_long_equation(r'T_{0000}', lat(br['T_0000']))
+
+    # =========================================================================
+    # SECTION 14 — MATTER FIELDS
+    # =========================================================================
+    if R.get('matter') is not None:
+        matter = R['matter']
+        if any(matter.get(k) is not None for k in ('scalar', 'maxwell', 'spin2')):
+            RL.append(r'\section{Matter Field Stress-Energy Tensors}')
+
+        if matter.get('scalar') is not None:
+            sc = matter['scalar']
+            RL.append(r'\subsection{Klein-Gordon Scalar Field}')
+            RL.append(
+                r'$T_{\mu\nu}^{(\phi)} = \partial_\mu\phi\,\partial_\nu\phi '
+                r'- \tfrac{1}{2}g_{\mu\nu}\!\left(g^{\alpha\beta}\partial_\alpha\phi\,\partial_\beta\phi '
+                r'+ m^2\phi^2\right)$'
+            )
+            RL += split_long_equation(r'g^{\mu\nu}T_{\mu\nu}^{(\phi)}', lat(sc['T_trace']))
+            if sc.get('mass_term') is not None and sc['mass_term'] != S.Zero:
+                RL += split_long_equation(r'm^2\phi^2', lat(sc['mass_term']))
+
+        if matter.get('maxwell') is not None:
+            em = matter['maxwell']
+            RL.append(r'\subsection{Maxwell Electromagnetic Field}')
+            RL.append(
+                r'$T_{\mu\nu}^{(\rm EM)} = F_{\mu\alpha}F_\nu{}^\alpha '
+                r'- \tfrac{1}{4}g_{\mu\nu}F_{\alpha\beta}F^{\alpha\beta}$'
+            )
+            RL += split_long_equation(r'F_{\alpha\beta}F^{\alpha\beta}', lat(em['F_sq']))
+            RL.append(r'Trace: $T^\mu{}_\mu = ' + lat(em['T_trace'])
+                      + r'$ (should vanish in 4D).')
+            eom = matter.get('maxwell_eom')
+            if eom:
+                if eom.get('vacuum_satisfied'):
+                    RL += make_tcolorbox('Maxwell Equations',
+                        [r'\textbf{VERIFIED:} $\nabla_\mu F^{\mu\nu} = 0$ for all $\nu$. $\checkmark$'],
+                        'boxgreen')
+                else:
+                    RL += make_tcolorbox('Maxwell Equations',
+                        [r'$\nabla_\mu F^{\mu\nu}$ does not vanish. '
+                         r'Check the vector potential or add a four-current.'], 'boxred')
+
+        if matter.get('spin2') is not None:
+            fp = matter['spin2']
+            RL.append(r'\subsection{Fierz-Pauli Spin-2 Mass Term}')
+            RL.append(
+                r'$\mathcal{L}_{\rm FP} = -\tfrac{m^2}{2}(h_{\mu\nu}h^{\mu\nu} - h^2)$, '
+                r'the unique ghost-free Lorentz-invariant mass term for a spin-2 field '
+                r'(Fierz \& Pauli 1939).'
+            )
+            RL += split_long_equation(r'h\,({\rm trace})', lat(fp['h_trace']))
+            RL += split_long_equation(r'\mathcal{L}_m', lat(fp['L_mass']))
+
+    # =========================================================================
+    # SECTION 15 — ADM 3+1 DECOMPOSITION
+    # =========================================================================
+    if R.get('adm31') is not None:
+        RL.append(r'\section{ADM 3+1 Decomposition}')
+        RL.append(
+            r'The Arnowitt-Deser-Misner 3+1 split foliates spacetime by '
+            r'space-like hypersurfaces $\Sigma_t$ with induced metric $\gamma_{ij}$, '
+            r'lapse $N$, and shift $\beta^i$:'
+        )
+        RL.append(r'\begin{equation}')
+        RL.append(
+            r'  ds^2 = -N^2\,dt^2 + \gamma_{ij}(dx^i + \beta^i dt)(dx^j + \beta^j dt).'
+        )
+        RL.append(r'\end{equation}')
+
+        adm  = R['adm31']
+        av   = adm['adm_vars']
+        ex   = adm['extrinsic']
+        r3   = adm['ricci3']
+        cons = adm['constraints']
+        adm_m= adm['adm_mass']
+
+        RL.append(r'\subsection{Lapse and Shift}')
+        RL += split_long_equation('N', lat(av['N']))
+        beta_str = r', '.join(
+            r'$\beta_{' + idx_lat(coords, i + 1) + r'} = ' + lat(b) + r'$'
+            for i, b in enumerate(av['beta_cov'])
+        )
+        RL.append(r'Shift (covariant): ' + beta_str + '.')
+
+        RL.append(r'\subsection{Extrinsic Curvature $K_{ij}$}')
+        RL.append(
+            r'$K_{ij} = -\tfrac{1}{2N}\!\left(\partial_t\gamma_{ij} '
+            r'- \nabla_i\beta_j - \nabla_j\beta_i\right)$.'
+        )
+        d     = dim - 1
+        _sidx = [idx_lat(coords, i + 1) for i in range(d)]
+        if matrix_is_complex(ex['K_cov']):
+            RL += matrix_to_component_list(ex['K_cov'], _sidx, _sidx, 'K')
+        else:
+            RL.append(r'\begin{equation}')
+            RL.append(r'  K_{ij} = ' + matrix_to_latex(ex['K_cov']))
+            RL.append(r'\end{equation}')
+        RL += split_long_equation('K', lat(ex['K_trace']))
+        RL += split_long_equation(r'K_{ij}K^{ij}', lat(ex['K_sq']))
+
+        RL.append(r'\subsection{Intrinsic 3D Ricci Scalar $R^{(3)}$}')
+        RL += split_long_equation(r'R^{(3)}', lat(r3['R3']))
+
+        RL.append(r'\subsection{Hamiltonian Constraint}')
+        RL.append(
+            r'$\mathcal{H} \equiv R^{(3)} + K^2 - K_{ij}K^{ij} = 16\pi\rho$ '
+            r'(vacuum: $\mathcal{H} = 0$).'
+        )
+        RL += split_long_equation(r'\mathcal{H}', lat(cons['H']))
+        if cons.get('H_vacuum_ok'):
+            RL += make_tcolorbox('Hamiltonian Constraint',
+                [r'\textbf{SATISFIED} in vacuum. $\checkmark$'], 'boxgreen')
+        else:
+            RL += make_tcolorbox('Hamiltonian Constraint',
+                [r'Residual $\mathcal{H} \neq 0$ symbolically. '
+                 r'May vanish after substituting specific functional forms '
+                 r'(known SymPy simplification limitation for abstract functions).'],
+                'boxred')
+
+        RL.append(r'\subsection{Momentum Constraints}')
+        RL.append(
+            r'$\mathcal{M}^i \equiv \nabla_j(K^{ij} - \gamma^{ij}K) = 8\pi J^i$ '
+            r'(vacuum: $\mathcal{M}^i = 0$).'
+        )
+        for i, Mi in enumerate(cons.get('M', [])):
+            RL += split_long_equation(rf'\mathcal{{M}}^{i+1}', lat(Mi))
+        if cons.get('M_vacuum_ok'):
+            RL += make_tcolorbox('Momentum Constraints',
+                [r'\textbf{ALL SATISFIED} in vacuum. $\checkmark$'], 'boxgreen')
+
+        RL.append(r'\subsection{ADM Mass and Angular Momentum}')
+        RL.append(
+            r'ADM mass from Regge-Teitelboim surface integral at spatial infinity '
+            r'(extracted via $1/r$ falloff of $g_{rr}$):'
+        )
+        if adm_m.get('M_ADM') is not None:
+            RL += split_long_equation(r'M_{\rm ADM}', lat(adm_m['M_ADM']))
+        if adm_m.get('J_ADM') is not None:
+            RL += split_long_equation(r'J_{\rm ADM}', lat(adm_m['J_ADM']))
+        if adm_m.get('notes'):
+            RL.append(r'\textit{' + adm_m['notes'].replace('_', r'\_') + r'}')
+
+    # =========================================================================
+    # SECTION 16 — PENROSE DIAGRAMS
+    # =========================================================================
+    if R.get('penrose_key') is not None:
+        RL.append(r'\section{Penrose-Carter Conformal Diagram}')
+        RL.append(
+            r'The Penrose-Carter conformal diagram maps the entire maximal extension of '
+            r'the spacetime into a finite bounded region, making the global causal structure '
+            r'manifest. Null geodesics appear as $45°$ lines; every point represents a '
+            r'2-sphere of radius $r$ (for spherically symmetric spacetimes).'
+        )
+        pk = R['penrose_key'].replace('_', ' ').title()
+        RL.append(r'Diagram corresponds to the \textbf{' + pk + r'} spacetime.')
+        RL.append(
+            r'\begin{tcolorbox}[colback=blue!4!white,colframe=blue!40!black,'
+            r'title=Penrose Diagram Generated]'
+        )
+        RL.append(
+            r'The diagram has been rendered as a matplotlib figure in the Python session. '
+            r'Save it with \texttt{draw\_penrose\_diagram("'
+            + R['penrose_key']
+            + r'", output\_path="penrose.pdf")} to embed in this document.'
+        )
+        RL.append(r'\end{tcolorbox}')
+
     RL += make_latex_footer()
     return RL
 
