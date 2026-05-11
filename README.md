@@ -5,6 +5,8 @@ Given any metric tensor, the engine computes every standard GR quantity and asse
 
 Spanish guide: [GUIA_USO_ES.md](GUIA_USO_ES.md)
 
+Command/help guide: [GUIA_COMANDOS_ES.md](GUIA_COMANDOS_ES.md)
+
 ---
 
 ## Capabilities
@@ -104,6 +106,23 @@ The default metric is `schwarzschild`. Output:
 - `gr_report.pdf` — compiled PDF (if pdflatex is available)
 
 Generated reports are intentionally treated as local outputs. They are ignored by Git so each run does not dirty the repository.
+
+### 1b — Explore the help system
+
+```bash
+python gr_help.py
+python gr_help.py examples
+python gr_help.py example fast_minkowski_run
+python gr_help.py validate
+```
+
+Inside Spyder or Colab:
+
+```python
+from gr_help import gr_help, validate_examples
+gr_help("metrics")
+validate_examples()
+```
 
 ### 2 — Change the metric
 

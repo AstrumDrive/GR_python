@@ -50,6 +50,20 @@ Para generar el PDF instalar MiKTeX (Windows) o TeX Live (Linux/macOS).
 
 ## Uso básico paso a paso
 
+### Sistema de ayuda interactiva
+
+Antes de editar codigo, puedes explorar los comandos y ejemplos:
+
+```bash
+python gr_help.py
+python gr_help.py topics
+python gr_help.py examples
+python gr_help.py example fast_minkowski_run
+python gr_help.py validate
+```
+
+La guia desplegable esta en [GUIA_COMANDOS_ES.md](GUIA_COMANDOS_ES.md).
+
 ### Ejecutar una métrica incorporada
 
 1. Abrir `gr_main.py`.
