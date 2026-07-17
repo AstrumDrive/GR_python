@@ -9,10 +9,12 @@ abstract: >-
 type: software
 license: "BSD-3-Clause"
 authors:
-  - name: "nebolivar and his AI partners :)"
-    affiliation: "Astrum Drive Technologies"
-repository-code: "https://github.com/xys004/GR_python"
-url: "https://github.com/xys004/GR_python"
+  - family-names: "Bolívar"
+    given-names: "Nelson"
+    affiliation: "Astrum Drive"
+repository-code: "https://github.com/AstrumDrive/GR_python"
+url: "https://github.com/AstrumDrive/GR_python"
+doi: "10.5281/zenodo.18974740"
 keywords:
   - general relativity
   - symbolic computation
