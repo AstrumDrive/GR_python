@@ -6,6 +6,7 @@ Use from a terminal:
     python gr_help.py
     python gr_help.py topics
     python gr_help.py metrics
+    python gr_help.py baez
     python gr_help.py example fast_minkowski_run
     python gr_help.py validate
 
@@ -47,6 +48,17 @@ TOPICS = OrderedDict(
                     "Use gr_metric_library.select_metric(key, coords) to retrieve a metric config.",
                     "Use METRIC_KEY = 'custom' plus CUSTOM_METRIC_CONFIG for a one-off metric.",
                     "Use METRIC_KEY = 'warp_doc_variant_b_alpha' for the full-spatial VdB/PG metric with alpha(r).",
+                ],
+            },
+        ),
+        (
+            "baez",
+            {
+                "title": "Baez tutorial core quantities",
+                "body": [
+                    "BAEZ_TUTORIAL_COVERAGE.md maps the quantities in John Baez's GR tutorial to the public API.",
+                    "It includes metric contractions, causal classification, index raising/lowering, torsion, parallel transport, and geodesic deviation.",
+                    "Run python validate_baez_tutorial.py for a focused symbolic and numerical smoke check.",
                 ],
             },
         ),

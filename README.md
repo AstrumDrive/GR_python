@@ -7,6 +7,8 @@ Spanish guide: [GUIA_USO_ES.md](GUIA_USO_ES.md)
 
 Command/help guide: [GUIA_COMANDOS_ES.md](GUIA_COMANDOS_ES.md)
 
+Baez tutorial coverage: [BAEZ_TUTORIAL_COVERAGE.md](BAEZ_TUTORIAL_COVERAGE.md)
+
 ---
 
 ## Capabilities
@@ -14,7 +16,10 @@ Command/help guide: [GUIA_COMANDOS_ES.md](GUIA_COMANDOS_ES.md)
 | Category | Quantities computed |
 |---|---|
 | **Connection** | Christoffel symbols Γ^λ_{μν} |
+| **Geometry primitives** | Metric products, causal type, proper-time rate, covector/vector index raising and lowering, rank-(0,2) contractions |
+| **Transport and torsion** | Symbolic and numerical parallel transport, torsion tensor and torsion-free check |
 | **Curvature** | Riemann R^λ_{ρμν}, Ricci R_{μν}, Ricci scalar R, Einstein G_{μν} |
+| **Geodesic deviation** | Jacobi acceleration A^a = R^a_{bcd} u^b ξ^c u^d |
 | **Invariants** | Kretschmann scalar K = R_{μνρσ}R^{μνρσ}, Weyl tensor C_{μνρσ} |
 | **Orthonormal frame** | ADM tetrad e^μ_â, frame Einstein tensor Ĝ_{âb̂}, energy conditions (NEC/WEC/SEC/DEC) |
 | **Geodesics** | Symbolic geodesic equations, cyclic coordinates, conserved momenta |
@@ -25,6 +30,7 @@ Command/help guide: [GUIA_COMANDOS_ES.md](GUIA_COMANDOS_ES.md)
 | **Horizons** | Event horizons (zeros of g^{rr}), static-limit/ergosphere, surface gravity κ, Hawking temperature T_H, null expansion θ, apparent horizon |
 | **Causal structure** | Automatic classification (Schwarzschild/Kerr/RN/de Sitter/...) + Penrose-Carter conformal diagrams |
 | **Matter fields** | Klein-Gordon T_{μν} + □φ equation, Maxwell F_{μν} + T_{μν} + ∇_μF^{μν} verification, Fierz-Pauli spin-2 mass term |
+| **Einstein equation** | Infer T_{μν} = G_{μν}/κ and evaluate G_{μν} - κT_{μν} |
 | **3+1 ADM** | Lapse N, shift β^i, induced metric γ_{ij}, extrinsic curvature K_{ij}, 3D Ricci scalar R^{(3)}, Hamiltonian constraint H, momentum constraints M^i |
 | **ADM mass** | M_ADM and J_ADM from asymptotic falloff |
 | **Numeric geodesics** | scipy RK45 integration, lambdified Christoffel symbols, conservation diagnostics, matplotlib orbit plots |
@@ -114,6 +120,8 @@ python gr_help.py
 python gr_help.py examples
 python gr_help.py example fast_minkowski_run
 python gr_help.py validate
+python gr_help.py baez
+python validate_baez_tutorial.py
 ```
 
 Inside Spyder or Colab:

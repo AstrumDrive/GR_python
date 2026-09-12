@@ -447,3 +447,41 @@ Si algun ejemplo falla, eso indica que la documentacion y el codigo dejaron de
 estar sincronizados.
 
 </details>
+
+<details>
+<summary>Cantidades centrales del tutorial de Baez</summary>
+
+Este bloque cubre producto metrico, tipo causal, subir/bajar indices, torsion,
+transporte paralelo, desviacion geodesica y la ecuacion de Einstein. Para el
+mapa completo, abre `BAEZ_TUTORIAL_COVERAGE.md`.
+
+```bash
+python validate_baez_tutorial.py
+```
+
+Ejemplo simbolico minimo:
+
+```python
+import sympy as sp
+from gr_tensors import (
+    metric_inner_product, classify_causal_vector, lower_vector,
+    raise_covector,
+)
+
+eta = sp.diag(-1, 1, 1, 1)
+u = sp.Matrix([1, 0, 0, 0])
+u_low = lower_vector(u, eta)
+
+print(metric_inner_product(eta, u, u))
+print(classify_causal_vector(eta, u))
+print(u_low)
+print(raise_covector(u_low, eta))
+```
+
+Resultado esperado:
+
+- Norma `-1` y tipo `timelike` con la convencion `(-,+,+,+)`.
+- `u_low = [-1, 0, 0, 0]`.
+- Al volver a subir el indice se recupera `u`.
+
+</details>

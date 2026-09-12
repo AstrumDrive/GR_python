@@ -9,6 +9,7 @@ along the computed trajectory.
 Provides:
   • lambdify_christoffel()   — convert symbolic Γ to fast numpy callables
   • integrate_geodesic()     — solve the geodesic ODE for given ICs
+  • integrate_parallel_transport() — transport a vector along a prescribed path
   • check_conserved()        — verify ε (norm), E (energy), L (ang. mom.) along geodesic
   • plot_geodesic()          — matplotlib 2-D and 3-D trajectory plots
 
@@ -211,6 +212,78 @@ def integrate_geodesic(Gamma_num, x0, u0, lambda_span,
         progress(f"  WARNING: Integration failed — {sol.message}")
 
     return sol
+
+
+# ==============================================================================
+# PARALLEL TRANSPORT ODE
+# ==============================================================================
+
+def integrate_parallel_transport(Gamma_num, position, tangent, V0, lambda_span,
+                                 dim=4, dense_output=True,
+                                 rtol=1e-9, atol=1e-11, max_step=np.inf):
+    """
+    Parallel transport V^mu along a numerical path x^mu(lambda).
+
+    ``position(lambda)`` and ``tangent(lambda)`` must each return ``dim``
+    numeric components. The solved equation is
+    dV^mu/dlambda = -Gamma^mu_alpha_beta(x) u^alpha V^beta.
+    """
+    try:
+        from scipy.integrate import solve_ivp
+    except ImportError:
+        raise ImportError("scipy is required for numerical parallel transport. "
+                          "Install with: pip install scipy")
+
+    V0 = np.asarray(V0, dtype=float)
+    if V0.shape != (dim,):
+        raise ValueError(f'V0 must contain exactly {dim} components.')
+
+    def rhs(lam, V):
+        x = np.asarray(position(lam), dtype=float)
+        u = np.asarray(tangent(lam), dtype=float)
+        if x.shape != (dim,) or u.shape != (dim,):
+            raise ValueError('position and tangent must each return dim components.')
+        dV = np.zeros(dim)
+        for mu in range(dim):
+            for alpha in range(dim):
+                if u[alpha] == 0.0:
+                    continue
+                for beta in range(dim):
+                    if V[beta] == 0.0:
+                        continue
+                    gamma = Gamma_num[mu][alpha][beta](*x)
+                    if np.isfinite(gamma):
+                        dV[mu] -= gamma * u[alpha] * V[beta]
+        return dV
+
+    progress(f"Parallel transporting vector over lambda in [{lambda_span[0]}, {lambda_span[1]}]...")
+    sol = solve_ivp(
+        rhs, lambda_span, V0, method='RK45', dense_output=dense_output,
+        rtol=rtol, atol=atol, max_step=max_step,
+    )
+    if sol.success:
+        progress(f"  Parallel transport successful: {len(sol.t)} steps")
+    else:
+        progress(f"  WARNING: Parallel transport failed — {sol.message}")
+    return sol
+
+
+def integrate_parallel_transport_on_geodesic(Gamma_num, geodesic_sol, V0,
+                                              lambda_span=None, dim=4, **kwargs):
+    """Transport a vector along the dense-output solution from ``integrate_geodesic``."""
+    if geodesic_sol.sol is None:
+        raise ValueError('geodesic_sol needs dense_output=True for parallel transport.')
+    span = lambda_span or (float(geodesic_sol.t[0]), float(geodesic_sol.t[-1]))
+
+    def position(lam):
+        return geodesic_sol.sol(lam)[:dim]
+
+    def tangent(lam):
+        return geodesic_sol.sol(lam)[dim:]
+
+    return integrate_parallel_transport(
+        Gamma_num, position, tangent, V0, span, dim=dim, **kwargs
+    )
 
 
 # ==============================================================================

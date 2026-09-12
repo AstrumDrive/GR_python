@@ -17,6 +17,7 @@ Sections contained:
 from gr_tensors import (
     compute_christoffel, compute_riemann, compute_ricci, compute_ricci_scalar,
     compute_einstein, compute_kretschmann, compute_weyl, transform_to_ortho,
+    compute_torsion, is_torsion_free, infer_stress_energy_from_einstein,
     check_bianchi, get_geodesic_equations, find_killing_coordinates,
     compute_energy_conditions, compute_tetrad_adm, verify_tetrad,
     compute_covariant_derivative_1form, compute_covariant_derivative_vector,
@@ -367,6 +368,8 @@ def run_computations(g_metric, coords, dim,
     results['Gamma'] = compute_christoffel(
         results['g'], results['ginv'], coords, dim
     )
+    results['torsion'] = compute_torsion(results['Gamma'], dim)
+    results['torsion_free'] = is_torsion_free(results['torsion'], dim)
 
     # ---- Phase 3: Curvature ----
     progress("=" * 60)
@@ -385,6 +388,7 @@ def run_computations(g_metric, coords, dim,
         results['Ric'], results['g'], results['ginv'],
         results['R_scalar'], dim
     )
+    results['T_from_geometry'] = infer_stress_energy_from_einstein(results['G'], dim=dim)
 
     # ---- Phase 5: Invariants ----
     progress("=" * 60)
