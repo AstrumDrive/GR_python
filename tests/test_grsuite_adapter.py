@@ -1,13 +1,22 @@
+import pytest
 import sympy as sp
 
-from grsuite_adapter import (
+# grsuite_contracts is an optional dependency of grsuite_adapter.  Skip rather
+# than fail collection where it is absent, otherwise the whole suite aborts on
+# any environment that does not install it (the ASTRUM pkgs env, for one).
+pytest.importorskip(
+    "grsuite_contracts",
+    reason="optional dependency grsuite-contracts is not installed",
+)
+
+from grsuite_adapter import (  # noqa: E402  (import after the skip guard)
     bundles_from_run,
     charge_bundles_from_results,
     geometry_bundle_from_results,
     metric_bundle_from_config,
     source_bundles_from_results,
 )
-from grsuite_contracts import to_dict
+from grsuite_contracts import to_dict  # noqa: E402
 
 
 def _metric():
