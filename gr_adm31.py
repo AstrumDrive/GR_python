@@ -138,10 +138,61 @@ def extract_adm_variables(g, ginv, coords, dim=4):
 
 
 # ==============================================================================
+# THREE-DIMENSIONAL LEVI-CIVITA CONNECTION OF THE SLICE
+# ==============================================================================
+
+def compute_3christoffel(gamma, gamma_inv, coords3):
+    """
+    Levi-Civita connection ³Γ^k_{ij} of the spatial metric γ_{ij}.
+
+        ³Γ^k_{ij} = ½ γ^{kl} (∂_i γ_{jl} + ∂_j γ_{il} − ∂_l γ_{ij})
+
+    This is the connection behind every intrinsic operation on the slice: the
+    3-Riemann tensor, the covariant derivative of the shift inside K_{ij}, and
+    the divergence in the momentum constraint.
+
+    It is NOT the 4D Christoffel symbol with its indices restricted to spatial
+    values.  Expanding Γ^k_{ij} = ½ g^{kμ}(∂_i g_{jμ} + ∂_j g_{iμ} − ∂_μ g_{ij}),
+    the μ = 0 term contributes ½ g^{k0}(∂_i β_j + ∂_j β_i − ∂_t γ_{ij}) with
+    g^{k0} = β^k/N², which vanishes only for g_{0i} = 0.  With a shift the two
+    differ, and substituting the 4D symbol into ∇_i β_j double-counts the
+    extrinsic information that K_{ij} is meant to measure.  See
+    tests/test_adm_pg.py for the Painlevé-Gullstrand case that pins this.
+
+    Parameters
+    ----------
+    gamma     : d×d Matrix  γ_{ij}
+    gamma_inv : d×d Matrix  γ^{ij}
+    coords3   : list of the d spatial coordinates (NOT the full 4D list)
+
+    Returns
+    -------
+    Gamma3 : nested list, Gamma3[k][i][j] = ³Γ^k_{ij}
+    """
+    d = gamma.rows
+
+    Gamma3 = [[[S.Zero]*d for _ in range(d)] for _ in range(d)]
+    for lam in range(d):
+        for mu in range(d):
+            for nu in range(d):
+                s = S.Zero
+                for sig in range(d):
+                    s += Rational(1, 2) * gamma_inv[lam, sig] * (
+                        diff(gamma[nu, sig], coords3[mu])
+                        + diff(gamma[mu, sig], coords3[nu])
+                        - diff(gamma[mu, nu], coords3[sig])
+                    )
+                Gamma3[lam][mu][nu] = cancel(s)
+
+    return Gamma3
+
+
+# ==============================================================================
 # EXTRINSIC CURVATURE
 # ==============================================================================
 
-def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4):
+def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4,
+                                Gamma3=None):
     """
     Compute the extrinsic curvature K_{ij} of the spatial slice.
 
@@ -153,13 +204,21 @@ def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4):
         K_{ij} = −(1/(2N)) (−∇_i β_j − ∇_j β_i)
                = (1/(2N)) (∇_i β_j + ∇_j β_i)
 
+    The ∇_i here is the covariant derivative of the slice, built from the
+    Levi-Civita connection ³Γ of γ_{ij} — not from the 4D Christoffel symbols
+    restricted to spatial indices, which differ from ³Γ whenever the shift is
+    non-zero.  See compute_3christoffel().
+
     Parameters
     ----------
     g, ginv  : 4D metric
-    Gamma    : 4D Christoffel symbols
+    Gamma    : 4D Christoffel symbols.  Unused; retained for call compatibility.
     coords   : list  (first coord = t)
     adm_vars : dict from extract_adm_variables()
     dim      : int
+    Gamma3   : optional precomputed 3D connection (as returned by
+               compute_3christoffel() or compute_3ricci_scalar()['Gamma3']).
+               Computed internally when omitted.
 
     Returns
     -------
@@ -167,6 +226,7 @@ def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4):
         'K_cov'   : (dim-1)×(dim-1) Matrix  K_{ij}
         'K_trace' : SymPy expr  K = γ^{ij} K_{ij}
         'K_sq'    : SymPy expr  K_{ij} K^{ij}
+        'Gamma3'  : the 3D connection actually used
     """
     progress("Computing extrinsic curvature K_{ij}...")
 
@@ -183,13 +243,25 @@ def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4):
         for j in range(d):
             dt_gamma[i, j] = cancel(diff(gamma[i, j], t))
 
-    # ∇_i β_j (3D covariant derivative of β_j using 4D Γ restricted to spatial)
-    # ∇_i β_j = ∂_i β_j − Γ^k_{ij} β_k  (3D indices shifted by 1 in 4D)
+    # 3D Levi-Civita connection of γ_{ij}.  This must be the intrinsic
+    # connection of the slice; the 4D Γ restricted to spatial indices is a
+    # different object as soon as g_{0i} ≠ 0.
+    if Gamma3 is None:
+        if ginv3 is None:
+            raise ValueError(
+                "compute_extrinsic_curvature: the spatial metric γ_{ij} could "
+                "not be inverted, so its Levi-Civita connection is undefined "
+                "and K_{ij} cannot be built.  Check that the slice is "
+                "non-degenerate."
+            )
+        Gamma3 = compute_3christoffel(gamma, ginv3, coords[1:])
+
+    # ∇_i β_j = ∂_i β_j − ³Γ^k_{ij} β_k  (3D index i → 4D coordinate i+1)
     def nabla_beta(i, j):
         """∂_i β_j − ³Γ^k_{ij} β_k, with 3D index i → 4D index i+1"""
         s = diff(beta[j], coords[i + 1])
         for k in range(d):
-            s -= Gamma[k + 1][i + 1][j + 1] * beta[k]
+            s -= Gamma3[k][i][j] * beta[k]
         return cancel(s)
 
     # K_{ij} = (1/2N)(−∂_t γ_{ij} + ∇_i β_j + ∇_j β_i)
@@ -228,6 +300,7 @@ def compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim=4):
         'K_cov':   K_cov,
         'K_trace': K_trace,
         'K_sq':    K_sq,
+        'Gamma3':  Gamma3,
     }
 
 
@@ -262,18 +335,7 @@ def compute_3ricci_scalar(gamma, gamma_inv, coords, dim=4):
     coords3 = coords[1:]   # spatial coordinates
 
     # 3D Christoffel symbols
-    Gamma3 = [[[S.Zero]*d for _ in range(d)] for _ in range(d)]
-    for lam in range(d):
-        for mu in range(d):
-            for nu in range(d):
-                s = S.Zero
-                for sig in range(d):
-                    s += Rational(1, 2) * gamma_inv[lam, sig] * (
-                        diff(gamma[nu, sig], coords3[mu])
-                        + diff(gamma[mu, sig], coords3[nu])
-                        - diff(gamma[mu, nu], coords3[sig])
-                    )
-                Gamma3[lam][mu][nu] = cancel(s)
+    Gamma3 = compute_3christoffel(gamma, gamma_inv, coords3)
 
     # 3D Riemann tensor R^λ_{ρμν}
     Riem3 = [[[[S.Zero]*d for _ in range(d)] for _ in range(d)] for _ in range(d)]
@@ -327,6 +389,10 @@ def compute_adm_constraints(R3, K_sq, K_trace, gamma_inv, Gamma3, K_cov, coords,
 
     Momentum constraints:
         M^i ≡ ∇_j (K^{ij} − γ^{ij} K) = 8π J^i
+
+    This routine uses the 3D connection correctly for its own divergence, but
+    it is only as good as the K_sq, K_trace and K_cov handed to it: those must
+    come from compute_extrinsic_curvature(), which builds them from ³Γ.
 
     Parameters
     ----------
@@ -547,9 +613,12 @@ def run_adm31(g, ginv, Gamma, coords, dim=4,
     progress("=" * 60)
 
     adm_vars   = extract_adm_variables(g, ginv, coords, dim)
-    extrinsic  = compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim)
+    # R^{(3)} first: its 3D connection is the same object K_{ij} needs, so it is
+    # computed once and shared rather than rebuilt symbolically twice.
     ricci3     = compute_3ricci_scalar(adm_vars['gamma_cov'], adm_vars['gamma_inv'],
                                         coords, dim)
+    extrinsic  = compute_extrinsic_curvature(g, ginv, Gamma, coords, adm_vars, dim,
+                                             Gamma3=ricci3['Gamma3'])
     constraints = compute_adm_constraints(
         ricci3['R3'], extrinsic['K_sq'], extrinsic['K_trace'],
         adm_vars['gamma_inv'], ricci3['Gamma3'], extrinsic['K_cov'],
