@@ -13,3 +13,6 @@ nul
 # Generated calculator outputs (re-created by running gr_calculator.py)
 gr_report.tex
 gr_report.pdf
+
+# Internal verification records (ASTRA/ASTRUM job traces): never published
+reviews/
