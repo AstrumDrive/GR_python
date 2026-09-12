@@ -94,6 +94,68 @@ def coord_latex(coord_sym):
 
 
 # ==============================================================================
+# SECTION 2 -- GEOMETRY PRIMITIVES
+# ==============================================================================
+
+def metric_inner_product(g, u, v, dim=4):
+    """Return g(u, v) = g_mu_nu u^mu v^nu for two contravariant vectors."""
+    value = S.Zero
+    for mu in range(dim):
+        for nu in range(dim):
+            value += g[mu, nu] * u[mu] * v[nu]
+    return cancel(value)
+
+
+def classify_causal_vector(g, v, dim=4):
+    """
+    Classify a vector using the -+++ convention used by the built-in metrics.
+
+    Returns a dictionary with ``norm_sq`` and ``causal_type``.  For symbolic
+    expressions whose sign SymPy cannot determine, the causal type is
+    ``'undetermined'`` rather than a guessed physical interpretation.
+    """
+    norm_sq = metric_inner_product(g, v, v, dim)
+    if _is_zero(norm_sq):
+        causal_type = 'null'
+    elif norm_sq.is_negative is True:
+        causal_type = 'timelike'
+    elif norm_sq.is_positive is True:
+        causal_type = 'spacelike'
+    else:
+        causal_type = 'undetermined'
+    return {'norm_sq': norm_sq, 'causal_type': causal_type}
+
+
+def proper_time_rate(g, tangent, dim=4):
+    """Return d tau / d lambda for a timelike curve in the -+++ convention."""
+    return sqrt(-metric_inner_product(g, tangent, tangent, dim))
+
+
+def lower_vector(vector, g, dim=4):
+    """Lower a vector index: v_mu = g_mu_nu v^nu."""
+    return Matrix([
+        cancel(sum(g[mu, nu] * vector[nu] for nu in range(dim)))
+        for mu in range(dim)
+    ])
+
+
+def raise_covector(covector, ginv, dim=4):
+    """Raise a covector index: omega^mu = g^mu_nu omega_nu."""
+    return Matrix([
+        cancel(sum(ginv[mu, nu] * covector[nu] for nu in range(dim)))
+        for mu in range(dim)
+    ])
+
+
+def contract_rank_02(T, ginv, dim=4):
+    """Contract a covariant rank-(0,2) tensor: g^mu_nu T_mu_nu."""
+    return cancel(sum(
+        ginv[mu, nu] * T[mu, nu]
+        for mu in range(dim) for nu in range(dim)
+    ))
+
+
+# ==============================================================================
 # SECTION 3 — COMPUTATION FUNCTIONS
 # ==============================================================================
 
@@ -145,6 +207,32 @@ def compute_christoffel(g, ginv, coords, dim=4):
                if Gamma[lam][mu][nu] != S.Zero)
     progress(f"  Done. Non-zero independent Christoffel components: {nz}")
     return Gamma
+
+
+def compute_torsion(Gamma, dim=4):
+    """
+    Compute the torsion tensor T^rho_mu_nu = Gamma^rho_mu_nu - Gamma^rho_nu_mu.
+
+    The Levi-Civita connection returned by ``compute_christoffel`` is torsion
+    free, but exposing this calculation makes that GR assumption testable for a
+    supplied connection as well.
+    """
+    torsion = [[[S.Zero] * dim for _ in range(dim)] for _ in range(dim)]
+    for rho in range(dim):
+        for mu in range(dim):
+            for nu in range(dim):
+                torsion[rho][mu][nu] = cancel(
+                    Gamma[rho][mu][nu] - Gamma[rho][nu][mu]
+                )
+    return torsion
+
+
+def is_torsion_free(torsion, dim=4):
+    """Return whether every component of a torsion tensor vanishes."""
+    return all(
+        _is_zero(torsion[rho][mu][nu])
+        for rho in range(dim) for mu in range(dim) for nu in range(dim)
+    )
 
 
 def compute_riemann(Gamma, coords, dim=4):
@@ -280,6 +368,29 @@ def compute_einstein(Ric, g, ginv, R_scalar, dim=4):
         for nu in range(dim):
             G[mu, nu] = cancel(Ric[mu, nu] - Rational(1, 2) * g[mu, nu] * R_scalar)
     return G
+
+
+def infer_stress_energy_from_einstein(G, kappa=8 * pi, dim=4):
+    """
+    Infer T_mu_nu = G_mu_nu / kappa from a metric in geometric units.
+
+    With the default kappa = 8*pi, this is Einstein's equation for G = c = 1.
+    Supply another nonzero coupling constant when using a different convention.
+    """
+    if _is_zero(kappa):
+        raise ValueError('kappa must be non-zero when inferring stress energy.')
+    return Matrix([
+        [cancel(G[mu, nu] / kappa) for nu in range(dim)]
+        for mu in range(dim)
+    ])
+
+
+def einstein_equation_residual(G, T, kappa=8 * pi, dim=4):
+    """Return G_mu_nu - kappa T_mu_nu component by component."""
+    return Matrix([
+        [cancel(G[mu, nu] - kappa * T[mu, nu]) for nu in range(dim)]
+        for mu in range(dim)
+    ])
 
 
 def compute_kretschmann(R_riem, g, ginv, dim=4):
@@ -580,6 +691,46 @@ def get_geodesic_equations(Gamma, coords, dim=4):
                     accel += Gamma[mu][alpha][beta] * u_syms[alpha] * u_syms[beta]
         eqs.append((mu, cancel(accel), u_syms))
     return eqs
+
+
+def get_parallel_transport_equations(Gamma, coords, dim=4):
+    """
+    Construct the parallel-transport equations along x^mu(lambda).
+
+    Each returned tuple is ``(mu, transport_term, V_symbols, u_symbols)`` and
+    represents dV^mu/dlambda = -transport_term, where
+    transport_term = Gamma^mu_alpha_beta u^alpha V^beta.
+    """
+    progress("Building parallel-transport equations...")
+    u_symbols = [symbols(f'dot_{{{coord_latex(c)}}}') for c in coords]
+    V_symbols = [symbols(f'V^{{{coord_latex(c)}}}') for c in coords]
+    equations = []
+    for mu in range(dim):
+        term = S.Zero
+        for alpha in range(dim):
+            for beta in range(dim):
+                if Gamma[mu][alpha][beta] != S.Zero:
+                    term += Gamma[mu][alpha][beta] * u_symbols[alpha] * V_symbols[beta]
+        equations.append((mu, cancel(term), V_symbols, u_symbols))
+    return equations
+
+
+def compute_geodesic_deviation_acceleration(R_riem, tangent, separation, dim=4):
+    """
+    Return the Jacobi/geodesic-deviation acceleration A^a = R^a_bcd u^b xi^c u^d.
+
+    This follows the Riemann-sign convention used by ``compute_riemann`` and
+    is the component form presented in Baez's GR tutorial.
+    """
+    acceleration = []
+    for a in range(dim):
+        value = S.Zero
+        for b in range(dim):
+            for c in range(dim):
+                for d in range(dim):
+                    value += R_riem[a][b][c][d] * tangent[b] * separation[c] * tangent[d]
+        acceleration.append(cancel(value))
+    return Matrix(acceleration)
 
 
 def find_killing_coordinates(g_metric, coords, dim=4):
